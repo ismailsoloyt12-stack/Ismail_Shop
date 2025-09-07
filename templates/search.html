@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <div class="search-header">
+        {% if query %}
+            <h1>Search Results for "{{ query }}"</h1>
+            <p>Found {{ results|length }} results</p>
+        {% else %}
+            <h1>All Apps</h1>
+            <p>Browse all available apps</p>
+        {% endif %}
+    </div>
+    
+    <div class="apps-grid">
+        {% if results %}
+            {% for app in results %}
+            <div class="app-card">
+                <a href="{{ url_for('app_detail', app_id=app.id) }}">
+                    <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                         alt="{{ app.name }}" class="app-icon"
+                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    <h3>{{ app.name }}</h3>
+                    <p>{{ app.developer }}</p>
+                    <div class="app-meta">
+                        <span class="category">{{ app.category }}</span>
+                        {% if app.price == "0" %}
+                            <span class="free-badge">FREE</span>
+                        {% else %}
+                            <span class="price">${{ app.price }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No results found</h3>
+                <p>Try searching with different keywords</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

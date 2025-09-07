@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>Test Enhanced App Store</title>
+    
+    <!-- Early Theme Application to Prevent Flash -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('app-store-theme') || 
+                          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0f0f0f' : '#ffffff');
+        })();
+    </script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="static/css/style-enhanced.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="#" class="logo">
+                    <i class="fas fa-play-circle"></i>
+                    <span>App Store</span>
+                </a>
+            </div>
+            
+            <div class="nav-center">
+                <form action="#" method="get" class="search-form">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="q" placeholder="Search apps & games">
+                        <button type="submit" class="search-btn">Search</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                <div class="user-menu">
+                    <button class="user-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span>John Doe</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#">
+                            <i class="fas fa-heart"></i> My Favorites
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-download"></i> My Downloads
+                        </a>
+                        <a href="#">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <hr>
+                        <a href="#">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar Menu -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Categories</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="#" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Games</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-th"></i>
+                    <span>Apps</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-tools"></i>
+                    <span>Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-users"></i>
+                    <span>Social</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-film"></i>
+                    <span>Entertainment</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Productivity</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="favorites-link">
+                <i class="fas fa-heart"></i>
+                <span>My Favorites</span>
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="flash-messages">
+            <div class="alert alert-success">
+                ✅ All enhancements have been applied successfully!
+                <button class="alert-close">&times;</button>
+            </div>
+        </div>
+        
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <div class="hero-content">
+                <h1>Welcome to the Enhanced App Store</h1>
+                <p>Professional, Mobile-Ready, and Feature-Rich</p>
+            </div>
+        </div>
+        
+        <!-- Test Features Section -->
+        <div class="app-section">
+            <div class="section-header">
+                <h2><i class="fas fa-star"></i> Test All Features</h2>
+            </div>
+            
+            <div class="container">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+                    <h3>✨ Key Features to Test:</h3>
+                    <ul style="list-style: none; padding: 0; margin-top: 1rem;">
+                        <li style="padding: 0.5rem 0;">
+                            <strong>1. Sidebar Navigation:</strong> Click the menu button (☰) - Should slide smoothly on mobile, toggle on desktop
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>2. Theme Toggle:</strong> Click the moon/sun icon - Theme persists across reloads
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>3. Command Palette:</strong> Press <kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>Cmd</kbd>+<kbd>K</kbd> on Mac) - Power feature!
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>4. Mobile Responsiveness:</strong> Resize your browser - Everything adapts perfectly
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>5. User Menu:</strong> Hover over the user button - Dropdown appears smoothly
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>6. Swipe Gestures (Mobile):</strong> Swipe right from left edge to open sidebar
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>7. Focus Trap:</strong> Open sidebar on mobile and press Tab - Focus stays within
+                        </li>
+                        <li style="padding: 0.5rem 0;">
+                            <strong>8. Escape Key:</strong> Press Esc to close sidebar or command palette
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Sample App Cards -->
+                <h3>Sample App Cards</h3>
+                <div class="apps-grid">
+                    <div class="app-card">
+                        <a href="#" class="app-link">
+                            <div class="app-icon">
+                                <img src="https://via.placeholder.com/200/4361ee/ffffff?text=App+1" alt="App 1">
+                            </div>
+                            <div class="app-info">
+                                <div class="app-name">Amazing App</div>
+                                <div class="app-developer">Developer Name</div>
+                                <div class="app-meta">
+                                    <div class="app-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="rating-value">4.0</span>
+                                    </div>
+                                    <div class="app-price">
+                                        <span class="free-badge">FREE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="app-card">
+                        <a href="#" class="app-link">
+                            <div class="app-icon">
+                                <img src="https://via.placeholder.com/200/06ffa5/ffffff?text=App+2" alt="App 2">
+                            </div>
+                            <div class="app-info">
+                                <div class="app-name">Productivity Pro</div>
+                                <div class="app-developer">Tech Company</div>
+                                <div class="app-meta">
+                                    <div class="app-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </div>
+                                        <span class="rating-value">5.0</span>
+                                    </div>
+                                    <div class="app-price">
+                                        <span class="price">$4.99</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="app-card">
+                        <a href="#" class="app-link">
+                            <div class="app-icon">
+                                <img src="https://via.placeholder.com/200/f72585/ffffff?text=Game" alt="Game">
+                            </div>
+                            <div class="app-info">
+                                <div class="app-name">Epic Game</div>
+                                <div class="app-developer">Game Studio</div>
+                                <div class="app-meta">
+                                    <div class="app-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </div>
+                                        <span class="rating-value">4.5</span>
+                                    </div>
+                                    <div class="app-price">
+                                        <span class="free-badge">FREE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="app-card">
+                        <a href="#" class="app-link">
+                            <div class="app-icon">
+                                <img src="https://via.placeholder.com/200/ffba08/ffffff?text=Tool" alt="Tool">
+                            </div>
+                            <div class="app-info">
+                                <div class="app-name">Utility Tool</div>
+                                <div class="app-developer">Tools Inc</div>
+                                <div class="app-meta">
+                                    <div class="app-rating">
+                                        <div class="stars">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </div>
+                                        <span class="rating-value">3.0</span>
+                                    </div>
+                                    <div class="app-price">
+                                        <span class="price">$2.99</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile Test Info -->
+                <div style="background: var(--accent-primary); color: white; padding: 2rem; border-radius: 1rem; margin-top: 3rem; text-align: center;">
+                    <h3>📱 Mobile Testing</h3>
+                    <p>Open DevTools (F12) → Toggle device toolbar (Ctrl+Shift+M) → Test at different screen sizes</p>
+                    <p style="margin-top: 1rem;">Recommended test sizes: 320px, 360px, 390px, 768px, 1024px, 1920px</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>App Store</h4>
+                <p>Your destination for amazing apps and games</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="#">Games</a></li>
+                    <li><a href="#">Apps</a></li>
+                    <li><a href="#">Tools</a></li>
+                    <li><a href="#">Social</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 App Store. All rights reserved. | Enhanced Version 2.0</p>
+        </div>
+    </footer>
+    
+    <!-- Enhanced JavaScript -->
+    <script src="static/js/main-enhanced.js"></script>
+    
+    <!-- Success Message -->
+    <script>
+        console.log('🎉 Enhanced App Store Test Page Loaded Successfully!');
+        console.log('💡 Press Ctrl/Cmd + K to open the command palette');
+        console.log('🎨 Click the theme toggle to switch between light and dark modes');
+        console.log('📱 Resize the window to test mobile responsiveness');
+    </script>
+</body>
+</html>

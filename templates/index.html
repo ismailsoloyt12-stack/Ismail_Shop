@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <!-- Hero Banner -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Welcome to the App Store</h1>
+            <p>Discover amazing apps and games for your device</p>
+        </div>
+    </section>
+    
+    <!-- Featured Apps Section -->
+    <section class="app-section">
+        <div class="section-header">
+            <h2><i class="fas fa-star"></i> Featured Apps</h2>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="apps-grid">
+            {% if featured_apps %}
+                {% for app in featured_apps %}
+                <div class="app-card" data-app-id="{{ app.id }}">
+                    <a href="{{ url_for('app_detail', app_id=app.id) }}" class="app-link">
+                        <div class="app-icon">
+                            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                                 alt="{{ app.name }}" 
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">{{ app.name }}</h3>
+                            <p class="app-developer">{{ app.developer }}</p>
+                            <div class="app-meta">
+                                <div class="app-rating">
+                                    <span class="stars" data-rating="{{ app.rating }}">
+                                        {% for i in range(5) %}
+                                            {% if i < app.rating|int %}
+                                                <i class="fas fa-star"></i>
+                                            {% elif i < app.rating %}
+                                                <i class="fas fa-star-half-alt"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="rating-value">{{ "%.1f"|format(app.rating) }}</span>
+                                </div>
+                                <div class="app-price">
+                                    {% if app.price == "0" %}
+                                        <span class="free-badge">FREE</span>
+                                    {% else %}
+                                        <span class="price">${{ app.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No Featured Apps Yet</h3>
+                    <p>Featured apps will appear here once added to the store.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    
+    <!-- Trending Apps Section -->
+    <section class="app-section">
+        <div class="section-header">
+            <h2><i class="fas fa-fire"></i> Trending Now</h2>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="apps-grid">
+            {% if trending_apps %}
+                {% for app in trending_apps %}
+                <div class="app-card" data-app-id="{{ app.id }}">
+                    <a href="{{ url_for('app_detail', app_id=app.id) }}" class="app-link">
+                        <div class="app-icon">
+                            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                                 alt="{{ app.name }}"
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">{{ app.name }}</h3>
+                            <p class="app-developer">{{ app.developer }}</p>
+                            <div class="app-meta">
+                                <div class="app-stats">
+                                    <i class="fas fa-download"></i>
+                                    <span>{{ app.downloads }} downloads</span>
+                                </div>
+                                <div class="app-price">
+                                    {% if app.price == "0" %}
+                                        <span class="free-badge">FREE</span>
+                                    {% else %}
+                                        <span class="price">${{ app.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>No Trending Apps Yet</h3>
+                    <p>Popular apps will appear here based on downloads.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    
+    <!-- Recently Added Section -->
+    <section class="app-section">
+        <div class="section-header">
+            <h2><i class="fas fa-clock"></i> Recently Added</h2>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="apps-grid">
+            {% if recent_apps %}
+                {% for app in recent_apps %}
+                <div class="app-card" data-app-id="{{ app.id }}">
+                    <a href="{{ url_for('app_detail', app_id=app.id) }}" class="app-link">
+                        <div class="app-icon">
+                            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                                 alt="{{ app.name }}"
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                            <span class="new-badge">NEW</span>
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">{{ app.name }}</h3>
+                            <p class="app-developer">{{ app.developer }}</p>
+                            <div class="app-meta">
+                                <div class="app-category">
+                                    <span class="category-badge">{{ app.category }}</span>
+                                </div>
+                                <div class="app-price">
+                                    {% if app.price == "0" %}
+                                        <span class="free-badge">FREE</span>
+                                    {% else %}
+                                        <span class="price">${{ app.price }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-plus-circle"></i>
+                    <h3>No Apps Added Yet</h3>
+                    <p>New apps will appear here once added to the store.</p>
+                    <p class="hint">Use manage_apps.py to add your first app!</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    
+    <!-- Categories Section -->
+    <section class="categories-section">
+        <div class="section-header">
+            <h2><i class="fas fa-th-large"></i> Browse Categories</h2>
+        </div>
+        
+        <div class="categories-grid">
+            <a href="{{ url_for('category', category_name='Games') }}" class="category-card">
+                <i class="fas fa-gamepad"></i>
+                <span>Games</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Tools') }}" class="category-card">
+                <i class="fas fa-tools"></i>
+                <span>Tools</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Social') }}" class="category-card">
+                <i class="fas fa-users"></i>
+                <span>Social</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Entertainment') }}" class="category-card">
+                <i class="fas fa-film"></i>
+                <span>Entertainment</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Productivity') }}" class="category-card">
+                <i class="fas fa-briefcase"></i>
+                <span>Productivity</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Education') }}" class="category-card">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Lifestyle') }}" class="category-card">
+                <i class="fas fa-heart"></i>
+                <span>Lifestyle</span>
+            </a>
+            <a href="{{ url_for('category', category_name='Music') }}" class="category-card">
+                <i class="fas fa-music"></i>
+                <span>Music</span>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

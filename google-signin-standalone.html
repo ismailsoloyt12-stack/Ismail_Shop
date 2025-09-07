@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in with Google - Firebase Auth</title>
+    
+    <!-- CSS Styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        /* Google Sign-In Button */
+        .google-signin-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px 20px;
+            background: white;
+            border: 2px solid #4285f4;
+            border-radius: 8px;
+            color: #4285f4;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 12px;
+        }
+        
+        .google-signin-btn:hover {
+            background: #4285f4;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        }
+        
+        .google-signin-btn img {
+            width: 24px;
+            height: 24px;
+        }
+        
+        /* User Profile Section */
+        .user-profile {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .user-profile.active {
+            display: block;
+        }
+        
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            border: 3px solid #4285f4;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-name {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        /* Sign Out Button */
+        .signout-btn {
+            display: none;
+            width: 100%;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .signout-btn.active {
+            display: block;
+        }
+        
+        .signout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        /* Login Section */
+        .login-section {
+            display: block;
+        }
+        
+        .login-section.hidden {
+            display: none;
+        }
+        
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4285f4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Error Message */
+        .error-message {
+            display: none;
+            background: #fee;
+            color: #c00;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .error-message.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #666;">Loading...</p>
+        </div>
+        
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <h1>Welcome</h1>
+            <p class="subtitle">Sign in to continue</p>
+            
+            <!-- Google Sign-In Button -->
+            <button id="googleSignInBtn" class="google-signin-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                Sign in with Google
+            </button>
+        </div>
+        
+        <!-- User Profile Section -->
+        <div id="userProfile" class="user-profile">
+            <img id="userPhoto" class="profile-pic" src="" alt="Profile Picture">
+            <h2 id="userName" class="user-name"></h2>
+            <p id="userEmail" class="user-email"></p>
+        </div>
+        
+        <!-- Sign Out Button -->
+        <button id="signOutBtn" class="signout-btn">Sign Out</button>
+        
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+    
+    <!-- Firebase JavaScript Module -->
+    <script type="module">
+        // Import required Firebase modules from CDN
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signOut, 
+            onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        // Firebase configuration object (provided by user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBles8dPATnlVUJ8-IKaHyCXqfh6e_HXiI",
+            authDomain: "ismailstore-638a3.firebaseapp.com",
+            projectId: "ismailstore-638a3",
+            storageBucket: "ismailstore-638a3.appspot.com",
+            messagingSenderId: "163789107661",
+            appId: "1:163789107661:web:8c67ebf5a32369a3051484",
+            measurementId: "G-13QF3PJVS4"
+        };
+        
+        // Initialize Firebase application with the configuration
+        const app = initializeApp(firebaseConfig);
+        
+        // Initialize Firebase Authentication and get a reference to the auth service
+        const auth = getAuth(app);
+        
+        // Create an instance of the Google provider for authentication
+        const provider = new GoogleAuthProvider();
+        
+        // Get DOM element references for UI manipulation
+        const googleSignInBtn = document.getElementById('googleSignInBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const userProfile = document.getElementById('userProfile');
+        const loginSection = document.getElementById('loginSection');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userPhoto = document.getElementById('userPhoto');
+        const loadingState = document.getElementById('loadingState');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        /**
+         * Handles the Google Sign-In process
+         * Opens a popup window for Google authentication
+         */
+        async function handleGoogleSignIn() {
+            try {
+                // Show loading state
+                showLoading(true);
+                errorMessage.classList.remove('active');
+                
+                // Trigger the Google sign-in popup
+                const result = await signInWithPopup(auth, provider);
+                
+                // Get Google Access Token (can be used for Google API if needed)
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                const token = credential.accessToken;
+                
+                // The signed-in user info
+                const user = result.user;
+                console.log('User successfully signed in:', user);
+                
+                // Hide loading state
+                showLoading(false);
+                
+            } catch (error) {
+                // Handle authentication errors
+                const errorCode = error.code;
+                const errorMsg = error.message;
+                console.error('Sign-in error:', errorCode, errorMsg);
+                
+                // Display user-friendly error message
+                let userMessage = 'Sign-in failed. Please try again.';
+                if (errorCode === 'auth/popup-closed-by-user') {
+                    userMessage = 'Sign-in cancelled.';
+                } else if (errorCode === 'auth/network-request-failed') {
+                    userMessage = 'Network error. Please check your connection.';
+                }
+                
+                showError(userMessage);
+                showLoading(false);
+            }
+        }
+        
+        /**
+         * Handles the sign-out process
+         * Signs the user out of Firebase Authentication
+         */
+        async function handleSignOut() {
+            try {
+                showLoading(true);
+                await signOut(auth);
+                console.log('User successfully signed out');
+                showLoading(false);
+            } catch (error) {
+                console.error('Sign-out error:', error);
+                showError('Sign-out failed. Please try again.');
+                showLoading(false);
+            }
+        }
+        
+        /**
+         * Updates the UI based on authentication state
+         * @param {Object|null} user - The authenticated user object or null if signed out
+         */
+        function updateUI(user) {
+            if (user) {
+                // User is signed in - show profile, hide login
+                loginSection.classList.add('hidden');
+                userProfile.classList.add('active');
+                signOutBtn.classList.add('active');
+                
+                // Update user profile information
+                userName.textContent = user.displayName || 'User';
+                userEmail.textContent = user.email;
+                userPhoto.src = user.photoURL || 'https://via.placeholder.com/100/4285f4/ffffff?text=User';
+                
+            } else {
+                // User is signed out - show login, hide profile
+                loginSection.classList.remove('hidden');
+                userProfile.classList.remove('active');
+                signOutBtn.classList.remove('active');
+            }
+        }
+        
+        /**
+         * Shows or hides the loading state
+         * @param {boolean} show - Whether to show the loading state
+         */
+        function showLoading(show) {
+            if (show) {
+                loadingState.classList.add('active');
+            } else {
+                loadingState.classList.remove('active');
+            }
+        }
+        
+        /**
+         * Displays an error message to the user
+         * @param {string} message - The error message to display
+         */
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 5000);
+        }
+        
+        /**
+         * Set up authentication state observer
+         * This listener is called whenever the user's sign-in state changes
+         * It persists across page refreshes
+         */
+        onAuthStateChanged(auth, (user) => {
+            updateUI(user);
+            if (user) {
+                console.log('Auth state: User is signed in', user.email);
+            } else {
+                console.log('Auth state: User is signed out');
+            }
+        });
+        
+        // Event listener for Google Sign-In button
+        googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+        
+        // Event listener for Sign Out button
+        signOutBtn.addEventListener('click', handleSignOut);
+        
+        // Log Firebase initialization
+        console.log('Firebase Authentication initialized successfully');
+    </script>
+</body>
+</html>

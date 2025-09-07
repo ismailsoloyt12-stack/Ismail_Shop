@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}My Favorites - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="favorites-container">
+    <div class="page-header">
+        <h1><i class="fas fa-heart"></i> My Favorites</h1>
+        <p>Your favorite apps in one place</p>
+    </div>
+    
+    <div class="apps-grid">
+        {% if apps %}
+            {% for app in apps %}
+            <div class="app-card">
+                <a href="{{ url_for('app_detail', app_id=app.id) }}">
+                    <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                         alt="{{ app.name }}" class="app-icon"
+                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    <h3>{{ app.name }}</h3>
+                    <p>{{ app.developer }}</p>
+                    <div class="app-meta">
+                        <span class="category">{{ app.category }}</span>
+                        {% if app.price == "0" %}
+                            <span class="free-badge">FREE</span>
+                        {% else %}
+                            <span class="price">${{ app.price }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="far fa-heart"></i>
+                <h3>No favorites yet</h3>
+                <p>Start adding apps to your favorites!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

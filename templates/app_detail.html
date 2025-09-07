@@ -1,0 +1,2010 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app.name }} - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="app-detail-container" data-app-id="{{ app.id }}">
+    <!-- App Header -->
+    <div class="app-header">
+        <div class="app-header-content">
+            <div class="app-icon-large">
+                <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                     alt="{{ app.name }}"
+                     onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+            </div>
+            <div class="app-header-info">
+                <h1 class="app-title">{{ app.name }}</h1>
+                <p class="app-developer">{{ app.developer }}</p>
+                <div class="app-badges">
+                    {% if app.contains_ads %}
+                        <span class="badge">Contains Ads</span>
+                    {% endif %}
+                    {% if app.in_app_purchases %}
+                        <span class="badge">In-app purchases</span>
+                    {% endif %}
+                </div>
+                <div class="app-stats-row">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ app.downloads }}</span>
+                        <span class="stat-label">Downloads</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">
+                            <i class="fas fa-star"></i> {{ "%.1f"|format(app.rating) }}
+                        </span>
+                        <span class="stat-label">{{ app.review_count }} reviews</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ app.age_rating }}</span>
+                        <span class="stat-label">Rated for</span>
+                    </div>
+                </div>
+            </div>
+            <div class="app-actions">
+                <button class="btn-primary download-btn" onclick="downloadApp('{{ app.id }}')">
+                    {% if app.price == "0" %}
+                        Install
+                    {% else %}
+                        Buy ${{ app.price }}
+                    {% endif %}
+                </button>
+                {% if current_user.is_authenticated %}
+                    <button class="btn-icon favorite-btn" onclick="toggleFavorite('{{ app.id }}')">
+                        <i class="far fa-heart"></i>
+                    </button>
+                {% endif %}
+                <button class="btn-icon share-btn">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enhanced Screenshots Carousel -->
+    {% if app.screenshots %}
+    <section class="screenshots-section">
+        <h2>Screenshots</h2>
+        <div class="carousel-container">
+            <button class="carousel-btn carousel-prev" onclick="moveCarousel(-1)" aria-label="Previous">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="screenshots-carousel" id="screenshotsCarousel">
+                <div class="carousel-track">
+                    {% for screenshot in app.screenshots %}
+                    <div class="screenshot" data-index="{{ loop.index0 }}">
+                        <img src="{{ url_for('static', filename='images/screenshots/' + screenshot) }}" 
+                             alt="Screenshot {{ loop.index }}"
+                             onclick="openImageModal(this)"
+                             onerror="this.style.display='none'">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <button class="carousel-btn carousel-next" onclick="moveCarousel(1)" aria-label="Next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators">
+                {% for screenshot in app.screenshots %}
+                <span class="indicator" data-index="{{ loop.index0 }}" onclick="goToSlide({{ loop.index0 }})"></span>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    
+    <!-- Image Modal for Full View -->
+    <div id="imageModal" class="image-modal">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <img class="image-modal-content" id="modalImage" alt="Full view">
+        <div class="image-modal-caption" id="modalCaption"></div>
+    </div>
+    {% endif %}
+    
+    <!-- About This App -->
+    <section class="about-section">
+        <h2>About this app</h2>
+        <div class="about-content">
+            <p>{{ app.long_description }}</p>
+            {% if app.tags %}
+            <div class="tags">
+                {% for tag in app.tags %}
+                    <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <button class="read-more-btn">Read more</button>
+        </div>
+    </section>
+    
+    <!-- Reviews Section -->
+    <section class="reviews-section">
+        <div class="reviews-header">
+            <h2>Ratings and reviews</h2>
+            <button class="write-review-btn" onclick="openReviewModal()">
+                <i class="fas fa-edit"></i> Write a review
+            </button>
+        </div>
+        
+        <div class="rating-summary">
+            <div class="overall-rating">
+                <span class="rating-number">{{ "%.1f"|format(app.rating) }}</span>
+                <div class="stars-large">
+                    {% for i in range(5) %}
+                        {% if i < app.rating|int %}
+                            <i class="fas fa-star"></i>
+                        {% elif i < app.rating %}
+                            <i class="fas fa-star-half-alt"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="review-count">{{ app.review_count }} reviews</span>
+            </div>
+        </div>
+        
+        <div class="reviews-list" id="reviewsList">
+            <!-- Reviews will be loaded here dynamically -->
+            <div class="loading-reviews">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading reviews...</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Additional Information -->
+    <section class="additional-info">
+        <h2>Additional information</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Updated</span>
+                <span class="info-value">{{ app.last_updated }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Size</span>
+                <span class="info-value">{{ app.size }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Current Version</span>
+                <span class="info-value">{{ app.version }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Requires Android</span>
+                <span class="info-value">{{ app.min_android }} and up</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Content Rating</span>
+                <span class="info-value">{{ app.age_rating }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Released</span>
+                <span class="info-value">{{ app.release_date }}</span>
+            </div>
+        </div>
+        
+        {% if app.requirements %}
+        <div class="requirements">
+            <h3>System Requirements</h3>
+            <ul>
+                <li>Storage: {{ app.requirements.storage }}</li>
+                <li>RAM: {{ app.requirements.ram }}</li>
+                <li>Internet: {{ "Required" if app.requirements.internet else "Not required" }}</li>
+            </ul>
+        </div>
+        {% endif %}
+        
+        {% if app.additional_info and app.additional_info.whats_new %}
+        <div class="whats-new">
+            <h3>What's New</h3>
+            <p>{{ app.additional_info.whats_new }}</p>
+        </div>
+        {% endif %}
+    </section>
+    
+    <!-- Similar Apps -->
+    {% if similar_apps %}
+    <section class="similar-apps">
+        <h2>Similar Apps</h2>
+        <div class="apps-grid">
+            {% for similar_app in similar_apps %}
+            <div class="app-card">
+                <a href="{{ url_for('app_detail', app_id=similar_app.id) }}">
+                    <img src="{{ url_for('static', filename='images/app_icons/' + similar_app.icon) }}" 
+                         alt="{{ similar_app.name }}"
+                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    <h4>{{ similar_app.name }}</h4>
+                    <p>{{ similar_app.developer }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<!-- Enhanced Review Form Modal -->
+<div id="reviewModal" class="review-modal">
+    <div class="review-modal-content">
+        <button class="close-modal" onclick="closeReviewModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="review-modal-header">
+            <h2><i class="fas fa-star"></i> Write Your Review</h2>
+            <p>Share your experience with {{ app.name }}</p>
+        </div>
+        
+        <!-- Netlify Forms Integration -->
+        <form id="reviewForm" 
+              name="app-reviews" 
+              method="POST" 
+              data-netlify="true" 
+              data-netlify-honeypot="bot-field"
+              action="/review-success">
+            
+            <!-- Hidden fields for Netlify and app identification -->
+            <input type="hidden" name="form-name" value="app-reviews">
+            <input type="hidden" name="app_id" value="{{ app.id }}">
+            <input type="hidden" name="app_name" value="{{ app.name }}">
+            <input type="hidden" name="bot-field">
+            
+            <div class="form-group">
+                <label for="reviewer_name">
+                    <i class="fas fa-user"></i> Your Name
+                </label>
+                <input type="text" 
+                       id="reviewer_name" 
+                       name="reviewer_name" 
+                       placeholder="Enter your name" 
+                       required 
+                       maxlength="50">
+            </div>
+            
+            <div class="form-group">
+                <label for="reviewer_email">
+                    <i class="fas fa-envelope"></i> Email (optional, not displayed)
+                </label>
+                <input type="email" 
+                       id="reviewer_email" 
+                       name="reviewer_email" 
+                       placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-star"></i> Rating
+                </label>
+                <div class="star-rating-input">
+                    <input type="hidden" name="rating" id="rating" value="5" required>
+                    <div class="stars-container">
+                        {% for i in range(1, 6) %}
+                        <i class="fas fa-star star-icon" 
+                           data-rating="{{ i }}" 
+                           onclick="setRating({{ i }})">
+                        </i>
+                        {% endfor %}
+                    </div>
+                    <span class="rating-text">Excellent</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="review_title">
+                    <i class="fas fa-heading"></i> Review Title
+                </label>
+                <input type="text" 
+                       id="review_title" 
+                       name="review_title" 
+                       placeholder="Summarize your experience" 
+                       required 
+                       maxlength="100">
+            </div>
+            
+            <div class="form-group">
+                <label for="review_comment">
+                    <i class="fas fa-comment"></i> Your Review
+                </label>
+                <textarea id="review_comment" 
+                          name="review_comment" 
+                          rows="5" 
+                          placeholder="Tell us about your experience with this app..." 
+                          required 
+                          maxlength="1000"></textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/1000 characters
+                </div>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="recommend" value="yes">
+                    <span>I would recommend this app to others</span>
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeReviewModal()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> Submit Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Review Success Modal -->
+<div id="reviewSuccessModal" class="success-modal">
+    <div class="success-modal-content">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Thank You!</h3>
+        <p>Your review has been submitted successfully.</p>
+        <button onclick="closeSuccessModal()" class="btn-primary">
+            Close
+        </button>
+    </div>
+</div>
+
+<!-- Beautiful Download Popup -->
+<div id="downloadPopup" class="download-popup">
+    <div class="download-popup-content">
+        <div class="download-header">
+            <h2 class="download-title">Thanks for downloading</h2>
+            <div class="heart-animation">
+                <span class="heart">❤️</span>
+            </div>
+        </div>
+        
+        <div class="download-progress">
+            <div class="progress-steps">
+                <div class="progress-step" id="step1">
+                    <div class="step-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <span class="step-text">Preparing the app link...</span>
+                </div>
+                <div class="progress-step" id="step2">
+                    <div class="step-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <span class="step-text">Loading data...</span>
+                </div>
+                <div class="progress-step" id="step3">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span class="step-text">File found in the database</span>
+                </div>
+                <div class="progress-step" id="step4">
+                    <div class="step-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <span class="step-text">Starting download...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-app-info">
+            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                 alt="{{ app.name }}" class="download-app-icon">
+            <div class="download-app-details">
+                <h3>{{ app.name }}</h3>
+                <p>{{ app.developer }}</p>
+                <p class="download-size">Size: {{ app.size }}</p>
+            </div>
+        </div>
+        
+        <button class="close-popup-btn" onclick="closeDownloadPopup()" style="display: none;">
+            Close
+        </button>
+    </div>
+</div>
+
+<style>
+/* Beautiful Download Popup Styles */
+.download-popup {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    animation: fadeIn 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Beautiful Custom Scrollbar for Popup */
+.download-popup::-webkit-scrollbar {
+    width: 12px;
+}
+
+.download-popup::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.download-popup::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+}
+
+.download-popup::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 0 15px rgba(118, 75, 162, 0.7);
+}
+
+/* Firefox Scrollbar */
+.download-popup {
+    scrollbar-width: thin;
+    scrollbar-color: #667eea rgba(255, 255, 255, 0.1);
+}
+
+.download-popup-content {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 5% auto;
+    margin-bottom: 5%;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.5s ease;
+    color: white;
+}
+
+/* Custom Scrollbar for Popup Content */
+.download-popup-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.download-popup-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.download-popup-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.download-popup-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Firefox Scrollbar for Content */
+.download-popup-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
+
+/* Ensure content is scrollable on mobile */
+@media (max-height: 700px) {
+    .download-popup-content {
+        margin: 2% auto;
+        max-height: 96vh;
+    }
+}
+
+@media (max-width: 600px) {
+    .download-popup-content {
+        width: 95%;
+        margin: 2% auto;
+        padding: 20px;
+        max-height: 96vh;
+    }
+    
+    .download-popup::-webkit-scrollbar {
+        width: 8px;
+    }
+}
+
+.download-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.download-title {
+    font-size: 28px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.heart-animation {
+    display: inline-block;
+    animation: heartBeat 1.5s ease-in-out infinite;
+}
+
+.heart {
+    font-size: 48px;
+    display: inline-block;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.3); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.3); }
+    70% { transform: scale(1); }
+}
+
+.download-progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 5px; /* Space for scrollbar */
+}
+
+.progress-step {
+    display: flex;
+    align-items: center;
+    opacity: 0.3;
+    transition: all 0.5s ease;
+}
+
+.progress-step.active {
+    opacity: 1;
+    transform: translateX(10px);
+}
+
+.progress-step.completed {
+    opacity: 0.8;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 18px;
+}
+
+.progress-step.active .step-icon {
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.step-text {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.download-app-info {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.download-app-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    margin-right: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.download-app-details h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+}
+
+.download-app-details p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.download-size {
+    margin-top: 5px !important;
+    font-size: 13px !important;
+    opacity: 0.8 !important;
+}
+
+.close-popup-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-popup-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth scroll behavior */
+.download-popup,
+.download-popup-content {
+    scroll-behavior: smooth;
+}
+
+/* Add scroll indicator for long content */
+.scroll-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 30px;
+    opacity: 0.6;
+    animation: scrollBounce 2s infinite;
+    display: none;
+}
+
+.scroll-indicator::before {
+    content: '⌄';
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@keyframes scrollBounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* Show scroll indicator when content overflows */
+.has-overflow .scroll-indicator {
+    display: block;
+}
+/* Review Modal Styles */
+.review-modal {
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow-y: auto;
+    animation: fadeIn 0.3s ease;
+}
+
+.review-modal-content {
+    background: white;
+    margin: 2% auto;
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideDown 0.5s ease;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal:hover {
+    background: #e0e0e0;
+    transform: rotate(90deg);
+}
+
+.review-modal-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.review-modal-header h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.review-modal-header p {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Form Styling */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group label i {
+    margin-right: 8px;
+    color: #667eea;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Star Rating Input */
+.star-rating-input {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.stars-container {
+    display: flex;
+    gap: 5px;
+}
+
+.star-icon {
+    font-size: 28px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.star-icon:hover {
+    color: #ffc107;
+    transform: scale(1.1);
+}
+
+.star-icon.active {
+    color: #ffc107;
+    animation: starPop 0.3s ease;
+}
+
+@keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+.rating-text {
+    font-weight: 600;
+    color: #667eea;
+    font-size: 16px;
+}
+
+/* Character Counter */
+.char-counter {
+    text-align: right;
+    color: #999;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* Checkbox Styling */
+.checkbox-group {
+    margin: 25px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    min-width: 150px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Write Review Button */
+.write-review-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.write-review-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Success Modal */
+.success-modal {
+    display: none;
+    position: fixed;
+    z-index: 10002;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    animation: fadeIn 0.3s ease;
+}
+
+.success-modal-content {
+    background: white;
+    margin: 15% auto;
+    padding: 40px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 20px;
+    text-align: center;
+    animation: slideDown 0.5s ease;
+}
+
+.success-icon {
+    font-size: 60px;
+    color: #4caf50;
+    margin-bottom: 20px;
+    animation: successPulse 1s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.success-modal-content h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.success-modal-content p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* Review Display Styles */
+.reviews-list {
+    margin-top: 30px;
+}
+
+.review-item {
+    background: #f9f9f9;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.review-item:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.reviewer-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.reviewer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.reviewer-details h4 {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.review-date {
+    color: #999;
+    font-size: 13px;
+}
+
+.review-rating {
+    display: flex;
+    gap: 2px;
+}
+
+.review-rating i {
+    color: #ffc107;
+    font-size: 14px;
+}
+
+.review-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.review-comment {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.review-recommended {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #e8f5e9;
+    color: #4caf50;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.loading-reviews {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+}
+
+.loading-reviews i {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #667eea;
+}
+
+.no-reviews {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border-radius: 15px;
+}
+
+.no-reviews i {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 15px;
+}
+
+.no-reviews p {
+    color: #999;
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .review-modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 5% auto;
+    }
+    
+    .stars-container {
+        gap: 3px;
+    }
+    
+    .star-icon {
+        font-size: 24px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-cancel,
+    .btn-submit {
+        width: 100%;
+    }
+}
+/* Enhanced Carousel Styles */
+.carousel-container {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.screenshots-carousel {
+    overflow: hidden;
+    border-radius: 16px;
+    margin: 0 60px;
+    position: relative;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 16px;
+}
+
+.screenshot {
+    flex: 0 0 auto;
+    width: 280px;
+    height: 500px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--border-light);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.screenshot:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-color: var(--accent-primary);
+}
+
+.screenshot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.screenshot:hover img {
+    transform: scale(1.1);
+}
+
+/* Carousel Navigation Buttons */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: var(--text-primary);
+    font-size: 20px;
+}
+
+.carousel-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+}
+
+.carousel-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-prev {
+    left: 10px;
+}
+
+.carousel-next {
+    right: 10px;
+}
+
+.carousel-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(200, 200, 200, 0.5);
+}
+
+.carousel-btn:disabled:hover {
+    transform: translateY(-50%);
+    background: rgba(200, 200, 200, 0.5);
+    color: var(--text-primary);
+}
+
+/* Carousel Indicators */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator:hover {
+    background: var(--accent-primary);
+    transform: scale(1.2);
+}
+
+.indicator.active {
+    background: var(--accent-primary);
+    width: 24px;
+    border-radius: 5px;
+}
+
+/* Image Modal */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 10003;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: fadeIn 0.3s ease;
+}
+
+.image-modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    animation: zoomIn 0.5s ease;
+}
+
+@keyframes zoomIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.image-modal-caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.image-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10004;
+    transition: all 0.3s ease;
+}
+
+.image-modal-close:hover,
+.image-modal-close:focus {
+    color: var(--accent-primary);
+    transform: scale(1.2);
+}
+
+/* Touch Support */
+@media (hover: none) and (pointer: coarse) {
+    .carousel-btn {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .screenshot {
+        scroll-snap-align: start;
+    }
+    
+    .screenshots-carousel {
+        scroll-snap-type: x mandatory;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .screenshots-carousel {
+        margin: 0 40px;
+    }
+    
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .carousel-prev {
+        left: 5px;
+    }
+    
+    .carousel-next {
+        right: 5px;
+    }
+    
+    .screenshot {
+        width: 200px;
+        height: 360px;
+    }
+}
+
+@media (max-width: 480px) {
+    .screenshots-carousel {
+        margin: 0 30px;
+    }
+    
+    .carousel-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .screenshot {
+        width: 160px;
+        height: 280px;
+    }
+}
+</style>
+
+<script>
+// Enhanced Carousel JavaScript
+let currentSlide = 0;
+let totalSlides = 0;
+let carouselTrack = null;
+let slideWidth = 296; // 280px width + 16px gap
+
+// Initialize carousel when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCarousel();
+});
+
+function initializeCarousel() {
+    carouselTrack = document.querySelector('.carousel-track');
+    if (!carouselTrack) return;
+    
+    const screenshots = document.querySelectorAll('.screenshot');
+    totalSlides = screenshots.length;
+    
+    // Update indicators
+    updateIndicators();
+    
+    // Update button states
+    updateCarouselButtons();
+    
+    // Add touch support
+    addTouchSupport();
+    
+    // Auto-resize handler
+    window.addEventListener('resize', handleResize);
+}
+
+function moveCarousel(direction) {
+    if (!carouselTrack) return;
+    
+    const containerWidth = document.querySelector('.screenshots-carousel').offsetWidth;
+    const visibleSlides = Math.floor(containerWidth / slideWidth);
+    const maxSlide = Math.max(0, totalSlides - visibleSlides);
+    
+    currentSlide += direction;
+    currentSlide = Math.max(0, Math.min(currentSlide, maxSlide));
+    
+    updateCarouselPosition();
+    updateIndicators();
+    updateCarouselButtons();
+}
+
+function goToSlide(index) {
+    currentSlide = index;
+    updateCarouselPosition();
+    updateIndicators();
+    updateCarouselButtons();
+}
+
+function updateCarouselPosition() {
+    if (!carouselTrack) return;
+    const offset = -currentSlide * slideWidth;
+    carouselTrack.style.transform = `translateX(${offset}px)`;
+}
+
+function updateIndicators() {
+    const indicators = document.querySelectorAll('.indicator');
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlide) {
+            indicator.classList.add('active');
+        } else {
+            indicator.classList.remove('active');
+        }
+    });
+}
+
+function updateCarouselButtons() {
+    const prevBtn = document.querySelector('.carousel-prev');
+    const nextBtn = document.querySelector('.carousel-next');
+    const containerWidth = document.querySelector('.screenshots-carousel').offsetWidth;
+    const visibleSlides = Math.floor(containerWidth / slideWidth);
+    const maxSlide = Math.max(0, totalSlides - visibleSlides);
+    
+    if (prevBtn) {
+        prevBtn.disabled = currentSlide === 0;
+    }
+    if (nextBtn) {
+        nextBtn.disabled = currentSlide >= maxSlide;
+    }
+}
+
+function addTouchSupport() {
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+    
+    const carousel = document.querySelector('.screenshots-carousel');
+    if (!carousel) return;
+    
+    carousel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+    });
+    
+    carousel.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        currentX = e.touches[0].clientX;
+    });
+    
+    carousel.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        const diff = startX - currentX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+                moveCarousel(1); // Swipe left, move right
+            } else {
+                moveCarousel(-1); // Swipe right, move left
+            }
+        }
+    });
+    
+    // Mouse drag support
+    carousel.addEventListener('mousedown', (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        carousel.style.cursor = 'grabbing';
+    });
+    
+    carousel.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        currentX = e.clientX;
+    });
+    
+    carousel.addEventListener('mouseup', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        carousel.style.cursor = 'grab';
+        
+        const diff = startX - currentX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+                moveCarousel(1);
+            } else {
+                moveCarousel(-1);
+            }
+        }
+    });
+    
+    carousel.addEventListener('mouseleave', () => {
+        isDragging = false;
+        carousel.style.cursor = 'grab';
+    });
+}
+
+function handleResize() {
+    updateCarouselButtons();
+    updateCarouselPosition();
+}
+
+// Image Modal Functions
+function openImageModal(img) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const caption = document.getElementById('modalCaption');
+    
+    modal.style.display = 'block';
+    modalImg.src = img.src;
+    caption.textContent = img.alt;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (document.getElementById('imageModal').style.display === 'block') {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+    } else {
+        if (e.key === 'ArrowLeft') {
+            moveCarousel(-1);
+        } else if (e.key === 'ArrowRight') {
+            moveCarousel(1);
+        }
+    }
+});
+
+function downloadApp(appId) {
+    // Show the beautiful download popup
+    const popup = document.getElementById('downloadPopup');
+    popup.style.display = 'block';
+    
+    // Reset all steps
+    const steps = document.querySelectorAll('.progress-step');
+    steps.forEach(step => {
+        step.classList.remove('active', 'completed');
+    });
+    
+    // Function to animate steps
+    function animateStep(stepNumber, callback) {
+        const step = document.getElementById(`step${stepNumber}`);
+        step.classList.add('active');
+        
+        setTimeout(() => {
+            step.classList.remove('active');
+            step.classList.add('completed');
+            if (callback) callback();
+        }, 1500);
+    }
+    
+    // Start the animation sequence
+    setTimeout(() => {
+        // Step 1: Preparing the app link
+        animateStep(1, () => {
+            // Step 2: Loading data
+            animateStep(2, () => {
+                // Step 3: File found in database
+                animateStep(3, () => {
+                    // Step 4: Starting download
+                    animateStep(4, () => {
+                        // Make the actual download request
+                        fetch(`/api/download/${appId}`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'}
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if(data.success) {
+                                // Update download counter
+                                const downloadStat = document.querySelector('.stat-value');
+                                if (downloadStat) {
+                                    downloadStat.textContent = data.downloads;
+                                }
+                                
+                                // If there's a real file, trigger download
+                                if (data.has_file && data.file_url) {
+                                    // Create invisible iframe to trigger download
+                                    const iframe = document.createElement('iframe');
+                                    iframe.style.display = 'none';
+                                    iframe.src = data.file_url;
+                                    document.body.appendChild(iframe);
+                                    
+                                    // Remove iframe after a delay
+                                    setTimeout(() => {
+                                        document.body.removeChild(iframe);
+                                    }, 5000);
+                                    
+                                    // Show success message
+                                    setTimeout(() => {
+                                        const stepText = document.querySelector('#step4 .step-text');
+                                        stepText.textContent = 'Download started successfully! ✨';
+                                        
+                                        // Show close button after download starts
+                                        const closeBtn = document.querySelector('.close-popup-btn');
+                                        closeBtn.style.display = 'block';
+                                    }, 500);
+                                } else {
+                                    // No real file, just show success
+                                    setTimeout(() => {
+                                        const stepText = document.querySelector('#step4 .step-text');
+                                        stepText.textContent = 'Ready to download! ✨';
+                                        
+                                        const closeBtn = document.querySelector('.close-popup-btn');
+                                        closeBtn.style.display = 'block';
+                                    }, 500);
+                                }
+                            } else {
+                                // Error occurred
+                                const stepText = document.querySelector('#step4 .step-text');
+                                stepText.textContent = 'Error: Could not start download';
+                                
+                                const closeBtn = document.querySelector('.close-popup-btn');
+                                closeBtn.style.display = 'block';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Download error:', error);
+                            const stepText = document.querySelector('#step4 .step-text');
+                            stepText.textContent = 'Error: Network issue';
+                            
+                            const closeBtn = document.querySelector('.close-popup-btn');
+                            closeBtn.style.display = 'block';
+                        });
+                    });
+                });
+            });
+        });
+    }, 500);
+}
+
+function closeDownloadPopup() {
+    const popup = document.getElementById('downloadPopup');
+    popup.style.display = 'none';
+    
+    // Reset the close button
+    const closeBtn = document.querySelector('.close-popup-btn');
+    closeBtn.style.display = 'none';
+    
+    // Reset step 4 text
+    const stepText = document.querySelector('#step4 .step-text');
+    stepText.textContent = 'Starting download...';
+}
+
+function toggleFavorite(appId) {
+    fetch(`/api/favorite/${appId}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        const btn = document.querySelector('.favorite-btn i');
+        if(data.favorited) {
+            btn.classList.remove('far');
+            btn.classList.add('fas');
+        } else {
+            btn.classList.remove('fas');
+            btn.classList.add('far');
+        }
+    });
+}
+
+// Review System JavaScript
+let currentRating = 5;
+const appId = '{{ app.id }}';
+
+// Load reviews when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadReviews();
+    initializeReviewForm();
+    updateStarDisplay(5);
+});
+
+// Initialize review form
+function initializeReviewForm() {
+    const form = document.getElementById('reviewForm');
+    const textarea = document.getElementById('review_comment');
+    const charCount = document.getElementById('charCount');
+    
+    // Character counter
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+    }
+    
+    // Form submission
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitReview();
+        });
+    }
+}
+
+// Open review modal
+function openReviewModal() {
+    const modal = document.getElementById('reviewModal');
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// Close review modal
+function closeReviewModal() {
+    const modal = document.getElementById('reviewModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    
+    // Reset form
+    document.getElementById('reviewForm').reset();
+    document.getElementById('charCount').textContent = '0';
+    setRating(5);
+}
+
+// Set rating
+function setRating(rating) {
+    currentRating = rating;
+    document.getElementById('rating').value = rating;
+    updateStarDisplay(rating);
+    
+    // Update rating text
+    const ratingText = document.querySelector('.rating-text');
+    const ratingTexts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+    ratingText.textContent = ratingTexts[rating];
+}
+
+// Update star display
+function updateStarDisplay(rating) {
+    const stars = document.querySelectorAll('.star-icon');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+// Submit review
+function submitReview() {
+    const form = document.getElementById('reviewForm');
+    const formData = new FormData(form);
+    
+    // Create review object
+    const review = {
+        app_id: appId,
+        reviewer_name: formData.get('reviewer_name'),
+        reviewer_email: formData.get('reviewer_email'),
+        rating: parseInt(formData.get('rating')),
+        review_title: formData.get('review_title'),
+        review_comment: formData.get('review_comment'),
+        recommend: formData.get('recommend') === 'yes',
+        date: new Date().toISOString()
+    };
+    
+    // Save to localStorage (for immediate display)
+    saveReviewLocally(review);
+    
+    // Submit to backend
+    fetch('/api/review/' + appId, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            rating: review.rating,
+            comment: review.review_comment,
+            title: review.review_title,
+            user: review.reviewer_name,
+            recommend: review.recommend
+        })
+    }).then(response => {
+        if (response.ok) {
+            // Show success modal
+            closeReviewModal();
+            showSuccessModal();
+            
+            // Reload reviews
+            loadReviews();
+            
+            // Update rating display
+            updateOverallRating();
+        }
+    }).catch(error => {
+        console.error('Error submitting review:', error);
+        // Still show success since we saved locally
+        closeReviewModal();
+        showSuccessModal();
+        loadReviews();
+    });
+    
+    // For Netlify Forms (submit in background)
+    const netlifyForm = new FormData(form);
+    fetch('/', {
+        method: 'POST',
+        body: netlifyForm
+    }).catch(error => console.log('Netlify form submission:', error));
+}
+
+// Save review locally
+function saveReviewLocally(review) {
+    const storageKey = `reviews_${appId}`;
+    let reviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    reviews.unshift(review);
+    localStorage.setItem(storageKey, JSON.stringify(reviews));
+}
+
+// Load reviews
+function loadReviews() {
+    const reviewsList = document.getElementById('reviewsList');
+    const storageKey = `reviews_${appId}`;
+    
+    // Get reviews from localStorage
+    const localReviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    
+    // Get existing reviews from app data
+    const existingReviews = {{ app.reviews | tojson | safe }} || [];
+    
+    // Combine reviews (local reviews first, then existing)
+    const allReviews = [...localReviews, ...existingReviews];
+    
+    if (allReviews.length === 0) {
+        reviewsList.innerHTML = `
+            <div class="no-reviews">
+                <i class="fas fa-comment-slash"></i>
+                <p>No reviews yet. Be the first to review!</p>
+            </div>
+        `;
+    } else {
+        reviewsList.innerHTML = allReviews.slice(0, 10).map(review => createReviewHTML(review)).join('');
+    }
+}
+
+// Create review HTML
+function createReviewHTML(review) {
+    const date = new Date(review.date || review.created_at || Date.now());
+    const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+    
+    const userName = review.reviewer_name || review.user || 'Anonymous';
+    const initial = userName.charAt(0).toUpperCase();
+    const rating = review.rating || 5;
+    const title = review.review_title || review.title || '';
+    const comment = review.review_comment || review.comment || '';
+    const recommend = review.recommend !== undefined ? review.recommend : true;
+    
+    return `
+        <div class="review-item">
+            <div class="review-header">
+                <div class="reviewer-info">
+                    <div class="reviewer-avatar">${initial}</div>
+                    <div class="reviewer-details">
+                        <h4>${userName}</h4>
+                        <span class="review-date">${formattedDate}</span>
+                    </div>
+                </div>
+                <div class="review-rating">
+                    ${[...Array(5)].map((_, i) => 
+                        `<i class="${i < rating ? 'fas' : 'far'} fa-star"></i>`
+                    ).join('')}
+                </div>
+            </div>
+            ${title ? `<div class="review-title">${title}</div>` : ''}
+            <p class="review-comment">${comment}</p>
+            ${recommend ? `
+                <span class="review-recommended">
+                    <i class="fas fa-thumbs-up"></i> Recommends this app
+                </span>
+            ` : ''}
+        </div>
+    `;
+}
+
+// Show success modal
+function showSuccessModal() {
+    const modal = document.getElementById('reviewSuccessModal');
+    modal.style.display = 'block';
+    
+    setTimeout(() => {
+        closeSuccessModal();
+    }, 3000);
+}
+
+// Close success modal
+function closeSuccessModal() {
+    const modal = document.getElementById('reviewSuccessModal');
+    modal.style.display = 'none';
+}
+
+// Update overall rating
+function updateOverallRating() {
+    const storageKey = `reviews_${appId}`;
+    const localReviews = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const existingReviews = {{ app.reviews | tojson | safe }} || [];
+    const allReviews = [...localReviews, ...existingReviews];
+    
+    if (allReviews.length > 0) {
+        const totalRating = allReviews.reduce((sum, review) => sum + (review.rating || 5), 0);
+        const avgRating = (totalRating / allReviews.length).toFixed(1);
+        
+        // Update rating display
+        const ratingNumber = document.querySelector('.rating-number');
+        const reviewCount = document.querySelector('.review-count');
+        
+        if (ratingNumber) ratingNumber.textContent = avgRating;
+        if (reviewCount) reviewCount.textContent = `${allReviews.length} reviews`;
+        
+        // Update stars
+        const starsContainer = document.querySelector('.stars-large');
+        if (starsContainer) {
+            const fullStars = Math.floor(avgRating);
+            const hasHalfStar = avgRating % 1 >= 0.5;
+            
+            starsContainer.innerHTML = [...Array(5)].map((_, i) => {
+                if (i < fullStars) {
+                    return '<i class="fas fa-star"></i>';
+                } else if (i === fullStars && hasHalfStar) {
+                    return '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    return '<i class="far fa-star"></i>';
+                }
+            }).join('');
+        }
+    }
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const reviewModal = document.getElementById('reviewModal');
+    const successModal = document.getElementById('reviewSuccessModal');
+    
+    if (event.target === reviewModal) {
+        closeReviewModal();
+    }
+    if (event.target === successModal) {
+        closeSuccessModal();
+    }
+}
+</script>
+
+<!-- Include the enhanced review system -->
+<script src="{{ url_for('static', filename='js/review-system.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,19 @@
+[
+  {
+    "id": "eb8489ed-06a3-45f9-86fe-78daf1f07b79",
+    "title": "Hello hero",
+    "message": "hi there did you like the website? did you know that this website createn by \"ismail_Mohammad from bangladesh? if you know so please donate me!",
+    "type": "special",
+    "icon": "🎉",
+    "link": "",
+    "target_audience": "all",
+    "created_at": "2025-09-07T23:52:19.124022",
+    "expires_at": "2025-09-14T23:52:19.124100",
+    "display_after": "2025-09-07T23:53:19.124131",
+    "priority": "high",
+    "read_by": [],
+    "click_count": 0,
+    "dismiss_count": 0,
+    "active": true
+  }
+]

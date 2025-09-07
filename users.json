@@ -1,0 +1,40 @@
+{
+  "1": {
+    "username": "ismailotako",
+    "email": "solomismailYt12@gmail.com",
+    "password": "pbkdf2:sha256:600000$dGyWUEbfTeoR8oQr$a36c7566d93e9fdc2bac75b20508d7fb6572abf4b8bc52e0cf3088bfe0d28f2e",
+    "created_at": "2025-09-07T17:08:24.304831"
+  },
+  "2": {
+    "username": "ismailmuhamed",
+    "email": "solomismailYt12@gmail.com",
+    "password": "pbkdf2:sha256:600000$sNQc8XJXwdP4ZKDJ$773ef72e456b04893107b1b9ce1e598297967c20a75fb04fe3b10295eca9d6bc",
+    "created_at": "2025-09-07T19:33:19.350379"
+  },
+  "firebase_YB816go62WhLlx13RJ2ZUD5g6D02": {
+    "username": "ismail mohammad",
+    "email": "solomismailyt12@gmail.com",
+    "password": "pbkdf2:sha256:600000$Jqq6u4XPVlZVHUAm$c9ec546c7d56ec1f649b21d484fe0214a25004c06c7f901851325220cd405d62",
+    "firebase_uid": "YB816go62WhLlx13RJ2ZUD5g6D02",
+    "display_name": "ismail mohammad",
+    "photo_url": "https://lh3.googleusercontent.com/a/ACg8ocLJ14Oq-OlSfbxai5B1mYunqI110PxvffbNi-PzGPfdISCtYA=s96-c",
+    "created_at": "2025-09-07T20:07:53.286248",
+    "auth_provider": "firebase",
+    "favorites": [],
+    "last_login": "2025-09-07T22:56:45.375805"
+  },
+  "firebase_xqSKdbvadxYKkTEJwOnU8b0SO4R2": {
+    "username": "ISMAIL Muhammad",
+    "email": "ismailmuhammadyt12@gmail.com",
+    "password": "pbkdf2:sha256:600000$kOWpF8qN42gw832y$308ff71f86f80798940b48b021e62fde759fb23cd32146cdb70fe91cb4928e28",
+    "firebase_uid": "xqSKdbvadxYKkTEJwOnU8b0SO4R2",
+    "display_name": "ISMAIL Muhammad",
+    "photo_url": "https://lh3.googleusercontent.com/a/ACg8ocLNBWFmtpkIH8v8-4mU4kCLkq3vhwcujO5MDmoyYZbI6UJZ4CU=s96-c",
+    "created_at": "2025-09-07T23:01:10.551017",
+    "auth_provider": "firebase",
+    "favorites": [
+      "c3a86114-f0cc-411d-81cb-cc3b350651a1"
+    ],
+    "last_login": "2025-09-07T23:52:38.138337"
+  }
+}

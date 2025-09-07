@@ -1,0 +1,13 @@
+This is a sample app file for testing the download functionality.
+
+Your App Store download system is now fully functional!
+
+Features included:
+- File path management in manage_apps_enhanced.py
+- Real file downloads via Flask (app.py)
+- Beautiful popup with progress animation
+- Heart logo animation
+- Step-by-step progress messages
+- Automatic download trigger
+
+Enjoy your enhanced App Store!

@@ -1,0 +1,234 @@
+<!-- 
+    Firebase Authentication Header Synchronization - Inline Version
+    Add this script to any page where you need header sync with Firebase Auth
+-->
+
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { 
+        getAuth, 
+        onAuthStateChanged 
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBles8dPATnlVUJ8-IKaHyCXqfh6e_HXiI",
+        authDomain: "ismailstore-638a3.firebaseapp.com",
+        projectId: "ismailstore-638a3",
+        storageBucket: "ismailstore-638a3.appspot.com",
+        messagingSenderId: "163789107661",
+        appId: "1:163789107661:web:8c67ebf5a32369a3051484",
+        measurementId: "G-13QF3PJVS4"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    /**
+     * Main function to update header based on authentication state
+     * @param {Object|null} user - Firebase user object or null if signed out
+     */
+    function updateHeaderUI(user) {
+        // Get header sign-in button (adjust selector based on your HTML structure)
+        const signInButton = document.getElementById('header-signin-button') || 
+                           document.querySelector('.login-btn') ||
+                           document.querySelector('.nav-right a[href*="login"]');
+        
+        // Get or create user profile element
+        let userProfileElement = document.getElementById('header-user-profile');
+        
+        if (user) {
+            // User is signed in
+            console.log('Header: User authenticated -', user.email);
+            
+            // Hide sign-in button
+            if (signInButton) {
+                signInButton.style.display = 'none';
+            }
+            
+            // Create user profile element if it doesn't exist
+            if (!userProfileElement) {
+                userProfileElement = createUserProfile(user);
+                
+                // Insert profile element in header
+                const navRight = document.querySelector('.nav-right');
+                if (navRight) {
+                    navRight.appendChild(userProfileElement);
+                } else if (signInButton && signInButton.parentNode) {
+                    signInButton.parentNode.insertBefore(userProfileElement, signInButton);
+                }
+            } else {
+                // Show existing profile element
+                userProfileElement.style.display = 'flex';
+                updateUserProfile(userProfileElement, user);
+            }
+            
+        } else {
+            // User is signed out
+            console.log('Header: User signed out');
+            
+            // Show sign-in button
+            if (signInButton) {
+                signInButton.style.display = '';
+            }
+            
+            // Hide or remove user profile
+            if (userProfileElement) {
+                userProfileElement.style.display = 'none';
+            }
+        }
+    }
+
+    /**
+     * Creates user profile element for header
+     * @param {Object} user - Firebase user object
+     * @returns {HTMLElement} Profile element
+     */
+    function createUserProfile(user) {
+        const container = document.createElement('div');
+        container.id = 'header-user-profile';
+        container.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        `;
+        
+        // Add hover effect
+        container.onmouseover = () => container.style.background = 'rgba(0,0,0,0.05)';
+        container.onmouseout = () => container.style.background = 'transparent';
+        
+        // Profile picture or initial
+        if (user.photoURL) {
+            const img = document.createElement('img');
+            img.src = user.photoURL;
+            img.alt = 'Profile';
+            img.style.cssText = `
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                border: 2px solid #4285f4;
+            `;
+            container.appendChild(img);
+        } else {
+            const initial = document.createElement('div');
+            initial.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+            initial.style.cssText = `
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+            `;
+            container.appendChild(initial);
+        }
+        
+        // User name (optional - can be removed for cleaner look)
+        const name = document.createElement('span');
+        name.textContent = user.displayName || user.email.split('@')[0];
+        name.style.cssText = `
+            font-size: 14px;
+            color: #333;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        `;
+        container.appendChild(name);
+        
+        return container;
+    }
+
+    /**
+     * Updates existing profile element with new user data
+     * @param {HTMLElement} element - Profile element to update
+     * @param {Object} user - Firebase user object
+     */
+    function updateUserProfile(element, user) {
+        const img = element.querySelector('img');
+        const initial = element.querySelector('div');
+        const name = element.querySelector('span');
+        
+        if (user.photoURL && img) {
+            img.src = user.photoURL;
+        } else if (!user.photoURL && initial) {
+            initial.textContent = (user.displayName || user.email || 'U')[0].toUpperCase();
+        }
+        
+        if (name) {
+            name.textContent = user.displayName || user.email.split('@')[0];
+        }
+    }
+
+    /**
+     * Initialize authentication state listener
+     */
+    function initializeHeaderSync() {
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, (user) => {
+            updateHeaderUI(user);
+            
+            // Optional: Add classes to body for CSS targeting
+            if (user) {
+                document.body.classList.add('user-authenticated');
+                document.body.classList.remove('user-anonymous');
+            } else {
+                document.body.classList.add('user-anonymous');
+                document.body.classList.remove('user-authenticated');
+            }
+        });
+        
+        console.log('Firebase header sync initialized');
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeHeaderSync);
+    } else {
+        initializeHeaderSync();
+    }
+</script>
+
+<!-- 
+    Optional CSS for better styling
+    Add this to your stylesheet or include inline
+-->
+<style>
+    /* Hide Flask/backend user menu when Firebase auth is active */
+    body.user-authenticated .user-menu:not(#header-user-profile) {
+        display: none !important;
+    }
+    
+    /* Ensure proper display of authentication elements */
+    #header-user-profile {
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        #header-user-profile span {
+            display: none; /* Hide username on mobile for space */
+        }
+    }
+</style>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <title>{% block title %}Game & App Store{% endblock %}</title>
+    
+    <!-- Early Theme Application to Prevent Flash -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('app-store-theme') || 
+                          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0f0f0f' : '#ffffff');
+        })();
+    </script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-enhanced.css') }}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-192.png') }}">
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('{{ url_for('static', filename='sw.js') }}')
+                    .then(registration => console.log('✅ ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed:', err));
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i class="fas fa-play-circle"></i>
+                    <span>App Store</span>
+                </a>
+            </div>
+            
+            <div class="nav-center">
+                <form action="{{ url_for('search') }}" method="get" class="search-form">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" name="q" placeholder="Search apps & games" value="{{ request.args.get('q', '') }}">
+                        <button type="submit" class="search-btn">Search</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                
+                {% if current_user.is_authenticated %}
+                    <div class="user-menu">
+                        <button class="user-btn">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{{ current_user.username }}</span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('favorites') }}">
+                                <i class="fas fa-heart"></i> My Favorites
+                            </a>
+                            <a href="#">
+                                <i class="fas fa-download"></i> My Downloads
+                            </a>
+                            <a href="#">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <hr>
+                            <a href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="login-btn">
+                        <i class="fas fa-user"></i>
+                        <span>Sign In</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar Menu -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Categories</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Games') }}">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Games</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Apps') }}">
+                    <i class="fas fa-th"></i>
+                    <span>Apps</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Tools') }}">
+                    <i class="fas fa-tools"></i>
+                    <span>Tools</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Social') }}">
+                    <i class="fas fa-users"></i>
+                    <span>Social</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Entertainment') }}">
+                    <i class="fas fa-film"></i>
+                    <span>Entertainment</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Productivity') }}">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Productivity</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('category', category_name='Education') }}">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Education</span>
+                </a>
+            </li>
+        </ul>
+        
+        {% if current_user.is_authenticated %}
+        <div class="sidebar-footer">
+            <a href="{{ url_for('favorites') }}" class="favorites-link">
+                <i class="fas fa-heart"></i>
+                <span>My Favorites</span>
+            </a>
+        </div>
+        {% endif %}
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                            <button class="alert-close">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>App Store</h4>
+                <p>Your destination for amazing apps and games</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="{{ url_for('category', category_name='Games') }}">Games</a></li>
+                    <li><a href="{{ url_for('category', category_name='Apps') }}">Apps</a></li>
+                    <li><a href="{{ url_for('category', category_name='Tools') }}">Tools</a></li>
+                    <li><a href="{{ url_for('category', category_name='Social') }}">Social</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 App Store. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/main-enhanced.js') }}"></script>
+    
+    <!-- Firebase Authentication Header Sync -->
+    <script type="module" src="{{ url_for('static', filename='js/auth-header-sync.js') }}"></script>
+    
+    <!-- Command Palette Info -->
+    <script>
+        // Command Palette is available globally - Press Ctrl/Cmd + K to open
+        console.log('💡 Tip: Press Ctrl/Cmd + K to open the command palette');
+    </script>
+</body>
+</html>

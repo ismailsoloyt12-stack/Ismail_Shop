@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Review Submitted Successfully - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="success-page-container">
+    <div class="success-content">
+        <div class="success-animation">
+            <div class="checkmark-circle">
+                <div class="checkmark"></div>
+            </div>
+        </div>
+        
+        <h1>Thank You!</h1>
+        <p class="success-message">Your review has been submitted successfully.</p>
+        <p class="success-submessage">Your feedback helps other users make informed decisions.</p>
+        
+        <div class="success-actions">
+            <button onclick="goBack()" class="btn-primary">
+                <i class="fas fa-arrow-left"></i> Back to App
+            </button>
+            <a href="/" class="btn-secondary">
+                <i class="fas fa-home"></i> Browse More Apps
+            </a>
+        </div>
+        
+        <div class="review-preview" id="reviewPreview">
+            <!-- Review preview will be shown here -->
+        </div>
+    </div>
+</div>
+
+<style>
+.success-page-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.success-content {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.success-animation {
+    margin-bottom: 30px;
+}
+
+.checkmark-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    margin: 0 auto;
+    position: relative;
+    animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    width: 30px;
+    height: 15px;
+    border-left: 4px solid white;
+    border-bottom: 4px solid white;
+    animation: checkmark 0.3s ease 0.5s forwards;
+    opacity: 0;
+}
+
+@keyframes checkmark {
+    to {
+        opacity: 1;
+    }
+}
+
+.success-content h1 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 36px;
+}
+
+.success-message {
+    color: #666;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.success-submessage {
+    color: #999;
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
+.success-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+.review-preview {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+    text-align: left;
+    display: none;
+}
+
+.review-preview.show {
+    display: block;
+}
+
+.review-preview h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.preview-rating {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.preview-rating i {
+    color: #ffc107;
+}
+
+.preview-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.preview-comment {
+    color: #666;
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .success-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+// Get review data from URL parameters (Netlify Forms passes form data)
+function displayReviewPreview() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reviewerName = urlParams.get('reviewer_name');
+    const rating = urlParams.get('rating');
+    const reviewTitle = urlParams.get('review_title');
+    const reviewComment = urlParams.get('review_comment');
+    
+    if (reviewerName || rating || reviewTitle || reviewComment) {
+        const previewDiv = document.getElementById('reviewPreview');
+        
+        let starsHTML = '';
+        const ratingNum = parseInt(rating) || 5;
+        for (let i = 0; i < 5; i++) {
+            starsHTML += `<i class="${i < ratingNum ? 'fas' : 'far'} fa-star"></i>`;
+        }
+        
+        previewDiv.innerHTML = `
+            <h3>Your Review:</h3>
+            <div class="preview-rating">${starsHTML}</div>
+            ${reviewTitle ? `<div class="preview-title">${reviewTitle}</div>` : ''}
+            ${reviewComment ? `<div class="preview-comment">${reviewComment}</div>` : ''}
+        `;
+        previewDiv.classList.add('show');
+    }
+}
+
+// Go back to previous page or app page
+function goBack() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const appId = urlParams.get('app_id');
+    
+    if (appId) {
+        window.location.href = `/app/${appId}`;
+    } else if (document.referrer) {
+        window.history.back();
+    } else {
+        window.location.href = '/';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    displayReviewPreview();
+    
+    // Auto redirect after 5 seconds
+    setTimeout(() => {
+        goBack();
+    }, 5000);
+});
+</script>
+{% endblock %}

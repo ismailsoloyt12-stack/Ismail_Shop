@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Game & App Store{% endblock %}
+
+{% block content %}
+<style>
+    /* Additional styles for Google Sign-In */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e0e0e0;
+    }
+    
+    .divider span {
+        padding: 0 16px;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .google-signin-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px 20px;
+        background: #fff;
+        border: 2px solid #4285f4;
+        border-radius: 8px;
+        color: #4285f4;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .google-signin-btn:hover {
+        background: #4285f4;
+        color: white;
+    }
+    
+    .google-signin-btn img {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+    
+    /* User profile section styles */
+    .user-profile-section {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .user-profile-section.active {
+        display: block;
+    }
+    
+    .user-profile-section img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+    }
+    
+    .user-profile-section h3 {
+        margin: 10px 0;
+        color: #333;
+    }
+    
+    .user-profile-section p {
+        color: #666;
+        margin: 5px 0;
+    }
+    
+    .signout-btn {
+        display: none;
+        width: 100%;
+        padding: 12px 20px;
+        background: #dc3545;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .signout-btn.active {
+        display: block;
+    }
+    
+    .signout-btn:hover {
+        background: #c82333;
+    }
+    
+    .auth-options {
+        display: block;
+    }
+    
+    .auth-options.hidden {
+        display: none;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <!-- User Profile Section (Hidden by default) -->
+        <div id="userProfile" class="user-profile-section">
+            <img id="userPhoto" src="" alt="User Photo">
+            <h3 id="userName"></h3>
+            <p id="userEmail"></p>
+        </div>
+        
+        <div id="authOptions" class="auth-options">
+            <h2>Sign In</h2>
+            <p>Welcome back! Sign in to continue.</p>
+            
+            <!-- Google Sign-In Button -->
+            <button id="googleSignInBtn" class="google-signin-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                Sign in with Google
+            </button>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <!-- Existing Form -->
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox">
+                        <input type="checkbox" name="remember"> Remember me
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-block">Sign In</button>
+            </form>
+        </div>
+        
+        <!-- Sign Out Button (Hidden by default) -->
+        <button id="signOutBtn" class="signout-btn">Sign Out</button>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('register') }}">Sign up</a></p>
+            <a href="#">Forgot password?</a>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase JavaScript -->
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { 
+        getAuth, 
+        signInWithPopup, 
+        GoogleAuthProvider, 
+        signOut, 
+        onAuthStateChanged 
+    } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    
+    // Firebase configuration object (provided by user)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBles8dPATnlVUJ8-IKaHyCXqfh6e_HXiI",
+        authDomain: "ismailstore-638a3.firebaseapp.com",
+        projectId: "ismailstore-638a3",
+        storageBucket: "ismailstore-638a3.appspot.com",
+        messagingSenderId: "163789107661",
+        appId: "1:163789107661:web:8c67ebf5a32369a3051484",
+        measurementId: "G-13QF3PJVS4"
+    };
+    
+    // Initialize Firebase app
+    const app = initializeApp(firebaseConfig);
+    
+    // Initialize Firebase Authentication and get a reference to the service
+    const auth = getAuth(app);
+    
+    // Create an instance of the Google provider object
+    const provider = new GoogleAuthProvider();
+    
+    // Get references to DOM elements
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const userProfile = document.getElementById('userProfile');
+    const authOptions = document.getElementById('authOptions');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const userPhoto = document.getElementById('userPhoto');
+    
+    // Function to sync Firebase auth with Flask backend
+    async function syncWithFlaskBackend(user) {
+        try {
+            const response = await fetch('/api/firebase-auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log('Flask backend synced:', data.message);
+                // Redirect to home page after successful sync
+                window.location.href = '/';
+            } else {
+                console.error('Failed to sync with Flask backend:', data.error);
+            }
+        } catch (error) {
+            console.error('Error syncing with Flask backend:', error);
+        }
+    }
+    
+    // Function to handle Google Sign-In
+    async function handleGoogleSignIn() {
+        try {
+            // Trigger the Google sign-in popup
+            const result = await signInWithPopup(auth, provider);
+            
+            // This gives you a Google Access Token
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential.accessToken;
+            
+            // The signed-in user info
+            const user = result.user;
+            console.log('User signed in:', user);
+            
+            // Sync with Flask backend
+            await syncWithFlaskBackend(user);
+            
+        } catch (error) {
+            // Handle Errors here
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error('Error during sign-in:', errorMessage);
+            alert('Sign-in failed: ' + errorMessage);
+        }
+    }
+    
+    // Function to handle Sign Out
+    async function handleSignOut() {
+        try {
+            await signOut(auth);
+            console.log('User signed out');
+        } catch (error) {
+            console.error('Error signing out:', error);
+            alert('Sign-out failed: ' + error.message);
+        }
+    }
+    
+    // Function to update UI based on authentication state
+    function updateUI(user) {
+        if (user) {
+            // User is signed in, show profile and hide sign-in options
+            authOptions.classList.add('hidden');
+            userProfile.classList.add('active');
+            signOutBtn.classList.add('active');
+            
+            // Update user profile information
+            userName.textContent = user.displayName || 'User';
+            userEmail.textContent = user.email;
+            userPhoto.src = user.photoURL || 'https://via.placeholder.com/80';
+            
+        } else {
+            // User is signed out, show sign-in options and hide profile
+            authOptions.classList.remove('hidden');
+            userProfile.classList.remove('active');
+            signOutBtn.classList.remove('active');
+        }
+    }
+    
+    // Set up authentication state observer
+    // This function runs whenever the user's sign-in state changes
+    onAuthStateChanged(auth, (user) => {
+        updateUI(user);
+    });
+    
+    // Event listener for Google Sign-In button
+    googleSignInBtn.addEventListener('click', handleGoogleSignIn);
+    
+    // Event listener for Sign Out button
+    signOutBtn.addEventListener('click', handleSignOut);
+</script>
+{% endblock %}

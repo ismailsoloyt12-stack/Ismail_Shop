@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category }} - Game & App Store{% endblock %}
+
+{% block content %}
+<div class="category-container">
+    <div class="category-header">
+        <h1>{{ category }}</h1>
+        <p>Discover the best {{ category|lower }} apps</p>
+    </div>
+    
+    <div class="apps-grid">
+        {% if apps %}
+            {% for app in apps %}
+            <div class="app-card">
+                <a href="{{ url_for('app_detail', app_id=app.id) }}">
+                    <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                         alt="{{ app.name }}" class="app-icon"
+                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    <h3>{{ app.name }}</h3>
+                    <p>{{ app.developer }}</p>
+                    <div class="app-rating">
+                        {% for i in range(5) %}
+                            {% if i < app.rating|int %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span>{{ "%.1f"|format(app.rating) }}</span>
+                    </div>
+                    <div class="app-price">
+                        {% if app.price == "0" %}
+                            <span class="free-badge">FREE</span>
+                        {% else %}
+                            <span class="price">${{ app.price }}</span>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>No {{ category }} apps yet</h3>
+                <p>Check back later for new {{ category|lower }} apps</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
