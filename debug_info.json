@@ -1,0 +1,19 @@
+{
+  "files_found": [
+    "app.py",
+    "apps_data.json",
+    "users.json",
+    "manage_apps_enhanced.py"
+  ],
+  "directories_found": [
+    "static",
+    "static/images",
+    "static/images/app_icons",
+    "templates",
+    "Apps_Link"
+  ],
+  "apps_count": 2,
+  "featured_apps": 1,
+  "trending_apps": 2,
+  "recent_apps": 2
+}

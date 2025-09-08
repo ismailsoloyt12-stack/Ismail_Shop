@@ -14,7 +14,7 @@
     "min_android": "",
     "age_rating": "Enjoy fun challenges that get harder as you progress.",
     "downloads": 9,
-    "views": 25,
+    "views": 26,
     "rating": 0,
     "review_count": 0,
     "reviews": [],
@@ -46,7 +46,7 @@
       "permissions": [],
       "whats_new": "Simple, user-friendly interface."
     },
-    "app_file_path": "Apps_Link\\app1_ZeQuize.apk"
+    "app_file_path": "Apps_Link/app1_ZeQuize.apk"
   },
   {
     "id": "c3a86114-f0cc-411d-81cb-cc3b350651a1",
@@ -82,7 +82,7 @@
       "ismail"
     ],
     "app_file": "app1_ZeQuize.apk",
-    "app_file_path": "Apps_Link\\app1_ZeQuize.apk",
+    "app_file_path": "Apps_Link/app1_ZeQuize.apk",
     "download_link": "/download/c3a86114-f0cc-411d-81cb-cc3b350651a1",
     "price": "100",
     "in_app_purchases": true,

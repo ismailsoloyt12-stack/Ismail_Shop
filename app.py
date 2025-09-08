@@ -1,17 +1,57 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_file, abort
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_file, abort, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from flask_cors import CORS
+from datetime import datetime, timedelta
 import json
 import os
 import secrets
 from pathlib import Path
 import mimetypes
+import uuid
+from functools import wraps
+import hashlib
+from collections import defaultdict
+import time
 
+# === DEBUG CODE FOR PYTHONANYWHERE DEPLOYMENT ===
+import sys
+print("DEBUG: Python version:", sys.version, file=sys.stderr)
+print("DEBUG: Current working directory:", os.getcwd(), file=sys.stderr)
+print("DEBUG: Files in current directory:", os.listdir('.'), file=sys.stderr)
+print("DEBUG: apps_data.json exists:", os.path.exists('apps_data.json'), file=sys.stderr)
+
+def debug_load_apps():
+    """Debug version of load_apps function"""
+    print("DEBUG: Loading apps...", file=sys.stderr)
+    if os.path.exists('apps_data.json'):
+        try:
+            with open('apps_data.json', 'r', encoding='utf-8') as f:
+                apps = json.load(f)
+            print(f"DEBUG: Loaded {len(apps)} apps successfully", file=sys.stderr)
+            for i, app in enumerate(apps[:3]):  # Show first 3 apps
+                print(f"DEBUG: App {i+1}: {app.get('name')} - Featured: {app.get('featured', False)}", file=sys.stderr)
+            return apps
+        except Exception as e:
+            print(f"DEBUG: Error loading apps: {e}", file=sys.stderr)
+            return []
+    else:
+        print("DEBUG: apps_data.json file not found!", file=sys.stderr)
+        return []
+
+# Override the load_apps function temporarily
+original_load_apps = load_apps
+load_apps = debug_load_apps
 app = Flask(__name__)
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 app.config['UPLOAD_FOLDER'] = 'static/images'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SESSION_COOKIE_SECURE'] = False  # Set True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+
+# Enable CORS for API endpoints
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -24,11 +64,39 @@ if os.path.exists('users.json'):
     with open('users.json', 'r') as f:
         users_db = json.load(f)
 
+# Collections storage
+collections_db = {}
+if os.path.exists('collections.json'):
+    with open('collections.json', 'r') as f:
+        collections_db = json.load(f)
+
+# User activities storage
+activities_db = defaultdict(list)
+if os.path.exists('activities.json'):
+    with open('activities.json', 'r') as f:
+        activities_db = defaultdict(list, json.load(f))
+
+# Analytics storage
+analytics_db = defaultdict(lambda: defaultdict(int))
+if os.path.exists('analytics.json'):
+    with open('analytics.json', 'r') as f:
+        loaded_data = json.load(f)
+        for key, value in loaded_data.items():
+            analytics_db[key] = defaultdict(int, value)
+
 class User(UserMixin):
     def __init__(self, id, username, email):
         self.id = id
         self.username = username
         self.email = email
+        self.is_admin = users_db.get(id, {}).get('is_admin', False)
+        self.avatar = users_db.get(id, {}).get('avatar', None)
+        self.bio = users_db.get(id, {}).get('bio', '')
+        self.favorites = users_db.get(id, {}).get('favorites', [])
+        self.wishlist = users_db.get(id, {}).get('wishlist', [])
+        self.downloads_history = users_db.get(id, {}).get('downloads_history', [])
+        self.followers = users_db.get(id, {}).get('followers', [])
+        self.following = users_db.get(id, {}).get('following', [])
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -381,6 +449,459 @@ def favorites():
     favorite_apps = [app for app in apps if app['id'] in user_favorites]
     
     return render_template('favorites.html', apps=favorite_apps)
+
+# ==================== NEW ENHANCED FEATURES ====================
+
+# Admin decorator
+def admin_required(f):
+    @wraps(f)
+    @login_required
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Profile System
+@app.route('/profile/<user_id>')
+def user_profile(user_id):
+    if user_id not in users_db:
+        abort(404)
+    
+    user_data = users_db[user_id]
+    apps = load_apps()
+    
+    # Get user's download history
+    user_downloads = []
+    for download in user_data.get('downloads_history', []):
+        app = next((a for a in apps if a['id'] == download['app_id']), None)
+        if app:
+            user_downloads.append({
+                **app,
+                'download_date': download['date']
+            })
+    
+    # Get user's reviews
+    user_reviews = []
+    for app in apps:
+        for review in app.get('reviews', []):
+            if review.get('user_id') == user_id:
+                user_reviews.append({
+                    **review,
+                    'app_name': app['name'],
+                    'app_icon': app['icon'],
+                    'app_id': app['id']
+                })
+    
+    # Get user's collections
+    user_collections = [c for c in collections_db.values() if c['user_id'] == user_id]
+    
+    # Get user's wishlist
+    user_wishlist = [app for app in apps if app['id'] in user_data.get('wishlist', [])]
+    
+    # Get user activities
+    user_activities = activities_db.get(user_id, [])
+    
+    # Prepare user object for template
+    profile_user = {
+        'id': user_id,
+        'username': user_data['username'],
+        'email': user_data['email'],
+        'avatar': user_data.get('avatar'),
+        'bio': user_data.get('bio', ''),
+        'location': user_data.get('location', ''),
+        'website': user_data.get('website', ''),
+        'joined_date': user_data.get('created_at', '').split('T')[0],
+        'downloads_count': len(user_data.get('downloads_history', [])),
+        'reviews_count': len(user_reviews),
+        'favorites_count': len(user_data.get('favorites', [])),
+        'followers_count': len(user_data.get('followers', [])),
+        'following_count': len(user_data.get('following', []))
+    }
+    
+    return render_template('profile.html',
+                         user=profile_user,
+                         user_downloads=user_downloads,
+                         user_reviews=user_reviews,
+                         user_collections=user_collections,
+                         user_wishlist=user_wishlist,
+                         user_activities=user_activities)
+
+@app.route('/api/profile/update', methods=['POST'])
+@login_required
+def update_profile():
+    data = request.json
+    user_id = current_user.id
+    
+    if user_id in users_db:
+        users_db[user_id]['username'] = data.get('username', users_db[user_id]['username'])
+        users_db[user_id]['bio'] = data.get('bio', '')
+        users_db[user_id]['location'] = data.get('location', '')
+        users_db[user_id]['website'] = data.get('website', '')
+        
+        with open('users.json', 'w') as f:
+            json.dump(users_db, f, indent=2)
+        
+        log_activity(user_id, 'profile_update', 'Updated profile information')
+        
+        return jsonify({'success': True})
+    
+    return jsonify({'success': False, 'error': 'User not found'}), 404
+
+# Wishlist System
+@app.route('/api/wishlist/add/<app_id>', methods=['POST'])
+@login_required
+def add_to_wishlist(app_id):
+    user_id = current_user.id
+    
+    if user_id in users_db:
+        if 'wishlist' not in users_db[user_id]:
+            users_db[user_id]['wishlist'] = []
+        
+        if app_id not in users_db[user_id]['wishlist']:
+            users_db[user_id]['wishlist'].append(app_id)
+            
+            with open('users.json', 'w') as f:
+                json.dump(users_db, f, indent=2)
+            
+            log_activity(user_id, 'wishlist_add', f'Added app to wishlist')
+            
+            return jsonify({'success': True, 'added': True})
+        else:
+            return jsonify({'success': True, 'added': False, 'message': 'Already in wishlist'})
+    
+    return jsonify({'success': False, 'error': 'User not found'}), 404
+
+@app.route('/api/wishlist/remove/<app_id>', methods=['POST'])
+@login_required
+def remove_from_wishlist(app_id):
+    user_id = current_user.id
+    
+    if user_id in users_db:
+        if 'wishlist' in users_db[user_id] and app_id in users_db[user_id]['wishlist']:
+            users_db[user_id]['wishlist'].remove(app_id)
+            
+            with open('users.json', 'w') as f:
+                json.dump(users_db, f, indent=2)
+            
+            return jsonify({'success': True})
+    
+    return jsonify({'success': False}), 404
+
+# Collections System
+@app.route('/api/collections/create', methods=['POST'])
+@login_required
+def create_collection():
+    data = request.json
+    collection_id = str(uuid.uuid4())
+    
+    collection = {
+        'id': collection_id,
+        'user_id': current_user.id,
+        'name': data.get('name', 'Untitled Collection'),
+        'description': data.get('description', ''),
+        'apps': data.get('apps', []),
+        'created_at': datetime.now().isoformat(),
+        'updated_at': datetime.now().isoformat(),
+        'is_public': data.get('is_public', True)
+    }
+    
+    collections_db[collection_id] = collection
+    
+    with open('collections.json', 'w') as f:
+        json.dump(collections_db, f, indent=2)
+    
+    log_activity(current_user.id, 'collection_create', f'Created collection: {collection["name"]}')
+    
+    return jsonify({'success': True, 'collection_id': collection_id})
+
+@app.route('/collection/<collection_id>')
+def view_collection(collection_id):
+    if collection_id not in collections_db:
+        abort(404)
+    
+    collection = collections_db[collection_id]
+    apps = load_apps()
+    collection_apps = [app for app in apps if app['id'] in collection['apps']]
+    
+    return render_template('collection.html', collection=collection, apps=collection_apps)
+
+# Follow System
+@app.route('/api/user/<user_id>/follow', methods=['POST'])
+@login_required
+def follow_user(user_id):
+    if user_id == current_user.id:
+        return jsonify({'success': False, 'error': 'Cannot follow yourself'}), 400
+    
+    if user_id not in users_db:
+        return jsonify({'success': False, 'error': 'User not found'}), 404
+    
+    # Add to current user's following list
+    if 'following' not in users_db[current_user.id]:
+        users_db[current_user.id]['following'] = []
+    
+    if user_id not in users_db[current_user.id]['following']:
+        users_db[current_user.id]['following'].append(user_id)
+    
+    # Add to target user's followers list
+    if 'followers' not in users_db[user_id]:
+        users_db[user_id]['followers'] = []
+    
+    if current_user.id not in users_db[user_id]['followers']:
+        users_db[user_id]['followers'].append(current_user.id)
+    
+    with open('users.json', 'w') as f:
+        json.dump(users_db, f, indent=2)
+    
+    log_activity(current_user.id, 'follow', f'Started following {users_db[user_id]["username"]}')
+    log_activity(user_id, 'follower', f'{current_user.username} started following you')
+    
+    return jsonify({'success': True})
+
+# Admin Dashboard
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    apps = load_apps()
+    total_users = len(users_db)
+    total_downloads = sum(app.get('downloads', 0) for app in apps)
+    total_reviews = sum(len(app.get('reviews', [])) for app in apps)
+    
+    # Get recent activities
+    all_activities = []
+    for user_id, activities in activities_db.items():
+        for activity in activities[-10:]:  # Last 10 activities per user
+            all_activities.append({
+                **activity,
+                'username': users_db.get(user_id, {}).get('username', 'Unknown')
+            })
+    
+    all_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+    
+    return render_template('admin.html',
+                         apps=apps,
+                         total_users=total_users,
+                         total_downloads=total_downloads,
+                         total_reviews=total_reviews,
+                         recent_activities=all_activities[:50])
+
+# Dark Mode API
+@app.route('/api/theme/toggle', methods=['POST'])
+def toggle_theme():
+    theme = request.json.get('theme', 'light')
+    resp = make_response(jsonify({'success': True, 'theme': theme}))
+    resp.set_cookie('theme', theme, max_age=365*24*60*60)  # 1 year
+    return resp
+
+# Advanced Search API
+@app.route('/api/search/advanced', methods=['POST'])
+def advanced_search():
+    data = request.json
+    apps = load_apps()
+    
+    # Apply filters
+    results = apps
+    
+    # Text search
+    if data.get('query'):
+        query = data['query'].lower()
+        results = [app for app in results if 
+                  query in app.get('name', '').lower() or
+                  query in app.get('description', '').lower() or
+                  query in app.get('developer', '').lower()]
+    
+    # Category filter
+    if data.get('category'):
+        results = [app for app in results if app.get('category') == data['category']]
+    
+    # Rating filter
+    if data.get('min_rating'):
+        results = [app for app in results if app.get('rating', 0) >= float(data['min_rating'])]
+    
+    # Price filter
+    if data.get('max_price') is not None:
+        results = [app for app in results if app.get('price', 0) <= float(data['max_price'])]
+    
+    # Sort
+    sort_by = data.get('sort_by', 'relevance')
+    if sort_by == 'rating':
+        results.sort(key=lambda x: x.get('rating', 0), reverse=True)
+    elif sort_by == 'downloads':
+        results.sort(key=lambda x: x.get('downloads', 0), reverse=True)
+    elif sort_by == 'date':
+        results.sort(key=lambda x: x.get('added_date', ''), reverse=True)
+    elif sort_by == 'name':
+        results.sort(key=lambda x: x.get('name', ''))
+    
+    return jsonify({'success': True, 'results': results[:50]})  # Limit to 50 results
+
+# App Comparison
+@app.route('/compare')
+def compare_apps():
+    app_ids = request.args.getlist('apps')
+    apps = load_apps()
+    compare_apps = [app for app in apps if app['id'] in app_ids]
+    
+    return render_template('compare.html', apps=compare_apps)
+
+# Analytics API
+@app.route('/api/analytics/track', methods=['POST'])
+def track_analytics():
+    data = request.json
+    event_type = data.get('type')
+    app_id = data.get('app_id')
+    
+    if event_type and app_id:
+        today = datetime.now().strftime('%Y-%m-%d')
+        analytics_db[app_id][f'{event_type}_{today}'] += 1
+        
+        # Save analytics
+        with open('analytics.json', 'w') as f:
+            json.dump(dict(analytics_db), f, indent=2)
+        
+        return jsonify({'success': True})
+    
+    return jsonify({'success': False}), 400
+
+@app.route('/api/analytics/dashboard/<app_id>')
+@admin_required
+def analytics_dashboard(app_id):
+    app_analytics = dict(analytics_db.get(app_id, {}))
+    
+    # Process analytics data for visualization
+    views_data = []
+    downloads_data = []
+    
+    for key, value in app_analytics.items():
+        if 'view_' in key:
+            date = key.replace('view_', '')
+            views_data.append({'date': date, 'count': value})
+        elif 'download_' in key:
+            date = key.replace('download_', '')
+            downloads_data.append({'date': date, 'count': value})
+    
+    return jsonify({
+        'views': views_data,
+        'downloads': downloads_data,
+        'total_views': sum(v['count'] for v in views_data),
+        'total_downloads': sum(d['count'] for d in downloads_data)
+    })
+
+# Notification System
+@app.route('/api/notifications')
+@login_required
+def get_notifications():
+    notifications = users_db.get(current_user.id, {}).get('notifications', [])
+    return jsonify({'notifications': notifications})
+
+@app.route('/api/notifications/mark-read', methods=['POST'])
+@login_required
+def mark_notifications_read():
+    notification_ids = request.json.get('ids', [])
+    
+    if current_user.id in users_db:
+        notifications = users_db[current_user.id].get('notifications', [])
+        for notif in notifications:
+            if notif['id'] in notification_ids:
+                notif['read'] = True
+        
+        users_db[current_user.id]['notifications'] = notifications
+        
+        with open('users.json', 'w') as f:
+            json.dump(users_db, f, indent=2)
+        
+        return jsonify({'success': True})
+    
+    return jsonify({'success': False}), 404
+
+# Helper Functions
+def log_activity(user_id, activity_type, description):
+    """Log user activity"""
+    activity = {
+        'id': str(uuid.uuid4()),
+        'type': activity_type,
+        'description': description,
+        'timestamp': datetime.now().isoformat(),
+        'time_ago': 'Just now'
+    }
+    
+    activities_db[user_id].append(activity)
+    
+    # Keep only last 100 activities per user
+    activities_db[user_id] = activities_db[user_id][-100:]
+    
+    # Save activities
+    with open('activities.json', 'w') as f:
+        json.dump(dict(activities_db), f, indent=2)
+
+def send_notification(user_id, title, message, type='info'):
+    """Send notification to user"""
+    if user_id in users_db:
+        if 'notifications' not in users_db[user_id]:
+            users_db[user_id]['notifications'] = []
+        
+        notification = {
+            'id': str(uuid.uuid4()),
+            'title': title,
+            'message': message,
+            'type': type,
+            'timestamp': datetime.now().isoformat(),
+            'read': False
+        }
+        
+        users_db[user_id]['notifications'].append(notification)
+        
+        # Keep only last 50 notifications
+        users_db[user_id]['notifications'] = users_db[user_id]['notifications'][-50:]
+        
+        with open('users.json', 'w') as f:
+            json.dump(users_db, f, indent=2)
+
+# Enhanced Review System
+@app.route('/api/review/<app_id>/helpful', methods=['POST'])
+@login_required
+def mark_review_helpful(app_id):
+    data = request.json
+    review_id = data.get('review_id')
+    
+    apps = load_apps()
+    app_data = next((app for app in apps if app['id'] == app_id), None)
+    
+    if app_data:
+        for review in app_data.get('reviews', []):
+            if review.get('id') == review_id:
+                if 'helpful_votes' not in review:
+                    review['helpful_votes'] = []
+                
+                if current_user.id not in review['helpful_votes']:
+                    review['helpful_votes'].append(current_user.id)
+                    review['helpful_count'] = len(review['helpful_votes'])
+                    
+                    save_apps(apps)
+                    return jsonify({'success': True, 'count': review['helpful_count']})
+                else:
+                    return jsonify({'success': False, 'message': 'Already voted'})
+    
+    return jsonify({'success': False, 'error': 'Review not found'}), 404
+
+# Settings API
+@app.route('/api/settings/update', methods=['POST'])
+@login_required
+def update_settings():
+    settings = request.json
+    
+    if current_user.id in users_db:
+        if 'settings' not in users_db[current_user.id]:
+            users_db[current_user.id]['settings'] = {}
+        
+        users_db[current_user.id]['settings'].update(settings)
+        
+        with open('users.json', 'w') as f:
+            json.dump(users_db, f, indent=2)
+        
+        return jsonify({'success': True})
+    
+    return jsonify({'success': False}), 404
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
