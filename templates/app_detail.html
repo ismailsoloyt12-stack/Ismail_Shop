@@ -2,15 +2,36 @@
 
 {% block title %}{{ app.name }} - Game & App Store{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/download-enhanced.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="app-detail-container" data-app-id="{{ app.id }}">
     <!-- App Header -->
     <div class="app-header">
         <div class="app-header-content">
             <div class="app-icon-large">
-                <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
-                     alt="{{ app.name }}"
-                     onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                {% if app.category == 'Premium Unlocked' %}
+                    <!-- Premium Unlocked apps use external URLs for images -->
+                    {% if app.icon and app.icon.startswith('http') %}
+                        <img src="{{ app.icon }}" 
+                             alt="{{ app.name }}"
+                             onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default_icon.png') }}" 
+                             alt="{{ app.name }}">
+                    {% endif %}
+                    <!-- Premium badge -->
+                    <div class="premium-badge-large">
+                        <i class="fas fa-crown"></i> PREMIUM UNLOCKED
+                    </div>
+                {% else %}
+                    <!-- Regular apps use local file paths -->
+                    <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                         alt="{{ app.name }}"
+                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                {% endif %}
             </div>
             <div class="app-header-info">
                 <h1 class="app-title">{{ app.name }}</h1>
@@ -72,10 +93,19 @@
                 <div class="carousel-track">
                     {% for screenshot in app.screenshots %}
                     <div class="screenshot" data-index="{{ loop.index0 }}">
-                        <img src="{{ url_for('static', filename='images/screenshots/' + screenshot) }}" 
-                             alt="Screenshot {{ loop.index }}"
-                             onclick="openImageModal(this)"
-                             onerror="this.style.display='none'">
+                        {% if app.category == 'Premium Unlocked' and screenshot.startswith('http') %}
+                            <!-- Premium Unlocked apps use external URLs for screenshots -->
+                            <img src="{{ screenshot }}" 
+                                 alt="Screenshot {{ loop.index }}"
+                                 onclick="openImageModal(this)"
+                                 onerror="this.style.display='none'">
+                        {% else %}
+                            <!-- Regular apps use local file paths -->
+                            <img src="{{ url_for('static', filename='images/screenshots/' + screenshot) }}" 
+                                 alt="Screenshot {{ loop.index }}"
+                                 onclick="openImageModal(this)"
+                                 onerror="this.style.display='none'">
+                        {% endif %}
                     </div>
                     {% endfor %}
                 </div>
@@ -349,60 +379,8 @@
     </div>
 </div>
 
-<!-- Beautiful Download Popup -->
-<div id="downloadPopup" class="download-popup">
-    <div class="download-popup-content">
-        <div class="download-header">
-            <h2 class="download-title">Thanks for downloading</h2>
-            <div class="heart-animation">
-                <span class="heart">❤️</span>
-            </div>
-        </div>
-        
-        <div class="download-progress">
-            <div class="progress-steps">
-                <div class="progress-step" id="step1">
-                    <div class="step-icon">
-                        <i class="fas fa-link"></i>
-                    </div>
-                    <span class="step-text">Preparing the app link...</span>
-                </div>
-                <div class="progress-step" id="step2">
-                    <div class="step-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <span class="step-text">Loading data...</span>
-                </div>
-                <div class="progress-step" id="step3">
-                    <div class="step-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <span class="step-text">File found in the database</span>
-                </div>
-                <div class="progress-step" id="step4">
-                    <div class="step-icon">
-                        <i class="fas fa-download"></i>
-                    </div>
-                    <span class="step-text">Starting download...</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="download-app-info">
-            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
-                 alt="{{ app.name }}" class="download-app-icon">
-            <div class="download-app-details">
-                <h3>{{ app.name }}</h3>
-                <p>{{ app.developer }}</p>
-                <p class="download-size">Size: {{ app.size }}</p>
-            </div>
-        </div>
-        
-        <button class="close-popup-btn" onclick="closeDownloadPopup()" style="display: none;">
-            Close
-        </button>
-    </div>
-</div>
+<!-- Include Enhanced Download Popup -->
+{% include 'download_popup_enhanced.html' %}
 
 <style>
 /* Beautiful Download Popup Styles */
@@ -704,6 +682,106 @@
 /* Show scroll indicator when content overflows */
 .has-overflow .scroll-indicator {
     display: block;
+}
+
+/* Premium Badge Styles for App Detail */
+.premium-badge-large {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    animation: premiumGlow 2s ease-in-out infinite alternate;
+}
+
+.premium-badge-large i {
+    font-size: 0.8rem;
+    animation: crownRotate 3s ease-in-out infinite;
+}
+
+@keyframes premiumGlow {
+    0% {
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    100% {
+        box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
+    }
+}
+
+@keyframes crownRotate {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(5deg) scale(1.1); }
+    50% { transform: rotate(0deg) scale(1); }
+    75% { transform: rotate(-5deg) scale(1.1); }
+}
+
+/* Premium MOD Features Section */
+.premium-mod-features {
+    background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+    border: 2px solid #667eea30;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-mod-features::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 100px;
+    height: 100px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.premium-mod-features h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.premium-mod-features p {
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive adjustments for premium elements */
+@media (max-width: 768px) {
+    .premium-badge-large {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        top: -8px;
+        right: -8px;
+    }
+    
+    .premium-mod-features {
+        padding: 15px;
+    }
+    
+    .premium-mod-features h3 {
+        font-size: 1.1rem;
+    }
 }
 /* Review Modal Styles */
 .review-modal {
@@ -2007,4 +2085,6 @@ window.onclick = function(event) {
 
 <!-- Include the enhanced review system -->
 <script src="{{ url_for('static', filename='js/review-system.js') }}"></script>
+<!-- Include the enhanced download system -->
+<script src="{{ url_for('static', filename='js/download-enhanced.js') }}"></script>
 {% endblock %}

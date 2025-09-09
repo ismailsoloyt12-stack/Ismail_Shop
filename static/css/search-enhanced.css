@@ -1,0 +1,125 @@
+/* Search Enhanced Styles - dropdown, items, and animations */
+:root {
+  --search-dropdown-max-height: 420px;
+}
+
+/* Container under search box */
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index: 1100;
+}
+
+.search-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.search-results-container {
+  max-height: var(--search-dropdown-max-height);
+  overflow-y: auto;
+}
+
+.search-section {
+  padding: 8px 0;
+}
+
+.search-section-title {
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.search-item:hover, .search-item.active {
+  background: var(--bg-secondary);
+}
+
+.search-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bg-tertiary);
+}
+
+.search-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-item-title {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-item-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.search-empty {
+  padding: 14px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Keyboard navigation highlight */
+.search-item.kb-selected {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* Placeholder typing effect caret (we animate via JS but style caret here) */
+.search-typing-caret {
+  display: inline-block;
+  width: 1px;
+  background: var(--text-secondary);
+  margin-left: 2px;
+  animation: caretBlink 1s steps(1) infinite;
+  height: 1em;
+  vertical-align: text-bottom;
+}
+
+@keyframes caretBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+

@@ -19,6 +19,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style-enhanced.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search-enhanced.css') }}">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -57,10 +58,22 @@
             
             <div class="nav-center">
                 <form action="{{ url_for('search') }}" method="get" class="search-form">
-                    <div class="search-box">
+                    <div class="search-box" id="searchBox">
                         <i class="fas fa-search"></i>
-                        <input type="text" name="q" placeholder="Search apps & games" value="{{ request.args.get('q', '') }}">
+                        <input type="text" 
+                               name="q" 
+                               id="searchInput"
+                               placeholder="Search apps & games" 
+                               value="{{ request.args.get('q', '') }}"
+                               autocomplete="off"
+                               data-typing-placeholder="Search apps & games">
                         <button type="submit" class="search-btn">Search</button>
+                        <!-- Search Results Dropdown -->
+                        <div class="search-dropdown" id="searchDropdown">
+                            <div class="search-results-container" id="searchResults">
+                                <!-- Results will be dynamically inserted here -->
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -156,6 +169,14 @@
                     <span>Education</span>
                 </a>
             </li>
+            <!-- Premium Unlocked Section -->
+            <li class="premium-category">
+                <a href="{{ url_for('category', category_name='Premium Unlocked') }}" class="premium-link">
+                    <i class="fas fa-crown"></i>
+                    <span>Premium Unlocked</span>
+                    <div class="premium-glow"></div>
+                </a>
+            </li>
         </ul>
         
         {% if current_user.is_authenticated %}
@@ -190,7 +211,7 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-section">
-                <h4>App Store</h4>
+                <h4>Ismail Store</h4>
                 <p>Your destination for amazing apps and games</p>
             </div>
             <div class="footer-section">
@@ -222,12 +243,13 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2024 App Store. All rights reserved.</p>
+            <p>&copy; 2025 Ismail Store. All rights reserved.</p>
         </div>
     </footer>
     
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main-enhanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/search-enhanced.js') }}"></script>
     
     <!-- Firebase Authentication Header Sync -->
     <script type="module" src="{{ url_for('static', filename='js/auth-header-sync.js') }}"></script>
@@ -237,5 +259,59 @@
         // Command Palette is available globally - Press Ctrl/Cmd + K to open
         console.log('💡 Tip: Press Ctrl/Cmd + K to open the command palette');
     </script>
+    
+    <!-- Premium Unlocked Styling -->
+    <style>
+        /* Premium Category - Simple, clean styling */
+        .premium-category {
+            margin-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            padding-top: 12px;
+        }
+        
+        .premium-link {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            margin: 0 12px;
+        }
+        
+        .premium-link:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        
+        .premium-link i {
+            color: #6b7280 !important;
+        }
+        
+        .premium-link span {
+            color: #374151 !important;
+            font-weight: 600;
+        }
+        
+        .premium-glow { display: none; }
+        
+        /* Dark theme */
+        [data-theme="dark"] .premium-category {
+            border-top-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .premium-link {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="dark"] .premium-link:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        [data-theme="dark"] .premium-link i {
+            color: #9ca3af !important;
+        }
+        
+        [data-theme="dark"] .premium-link span {
+            color: #e5e7eb !important;
+        }
+    </style>
 </body>
 </html>

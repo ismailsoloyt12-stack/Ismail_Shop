@@ -2417,7 +2417,13 @@ def add_app():
     """Add a new app to the store with image management"""
     ensure_directories()
     print("\n=== ADD NEW APP WITH IMAGES ===")
-    show_available_images()
+    
+    # Ask if this is a Premium Unlocked app
+    print("\n🔓 Is this a Premium Unlocked app (external app from other sources)?")
+    is_premium = input("Enter 'yes' for Premium Unlocked, 'no' for regular app: ").lower() == 'yes'
+    
+    if not is_premium:
+        show_available_images()
     
     app_id = str(uuid.uuid4())
     print(f"\nApp ID: {app_id}")
@@ -2427,19 +2433,51 @@ def add_app():
         'id': app_id,
         'name': input("\n📱 App Name: "),
         'developer': input("👤 Developer Name: "),
-        'category': input("📂 Category (e.g., Games, Tools, Social, etc.): "),
-        'description': input("📝 Short Description: "),
-        'long_description': input("📄 Long Description (About this app): "),
+        'is_premium_unlocked': is_premium,
     }
+    
+    if is_premium:
+        app['category'] = 'Premium Unlocked'
+        app['original_source'] = input("🌐 Original Source/Website: ")
+        app['mod_features'] = input("✨ Mod Features (e.g., Pro Unlocked, No Ads, etc.): ")
+    else:
+        app['category'] = input("📂 Category (e.g., Games, Tools, Social, etc.): ")
+    
+    app['description'] = input("📝 Short Description: ")
+    app['long_description'] = input("📄 Long Description (About this app): ")
     
     # Handle App Icon
     print("\n🎨 APP ICON SELECTION")
-    app['app_icon'] = select_or_add_image("App Icon", APP_ICONS_DIR)
-    app['icon'] = app['app_icon']  # Legacy field
+    if is_premium:
+        icon_url = input("Enter external icon URL (http://...): ")
+        if icon_url.startswith('http'):
+            app['app_icon'] = icon_url
+            app['icon'] = icon_url
+            app['is_external_icon'] = True
+        else:
+            print("Invalid URL. Using default icon.")
+            app['app_icon'] = "default_icon.png"
+            app['icon'] = "default_icon.png"
+            app['is_external_icon'] = False
+    else:
+        app['app_icon'] = select_or_add_image("App Icon", APP_ICONS_DIR)
+        app['icon'] = app['app_icon']  # Legacy field
+        app['is_external_icon'] = False
     
     # Handle Banner
     print("\n🖼️ BANNER SELECTION")
-    app['banner'] = select_or_add_image("Banner", APP_BANNERS_DIR)
+    if is_premium:
+        banner_url = input("Enter external banner URL (http://...): ")
+        if banner_url.startswith('http'):
+            app['banner'] = banner_url
+            app['is_external_banner'] = True
+        else:
+            print("Invalid URL. Using default banner.")
+            app['banner'] = "default_banner.jpg"
+            app['is_external_banner'] = False
+    else:
+        app['banner'] = select_or_add_image("Banner", APP_BANNERS_DIR)
+        app['is_external_banner'] = False
     
     # Basic app info
     app.update({
@@ -2461,30 +2499,52 @@ def add_app():
     # Handle Screenshots
     print("\n📸 SCREENSHOTS (Regular screenshots for details page)")
     app['screenshots'] = []
-    screenshot_count = int(input("How many screenshots to add? (0-10): ") or "0")
-    for i in range(screenshot_count):
-        screenshot = select_or_add_image(f"Screenshot {i+1}", SCREENSHOTS_DIR)
-        if screenshot:
-            app['screenshots'].append(screenshot)
+    if is_premium:
+        screenshot_count = int(input("How many external screenshot URLs to add? (0-10): ") or "0")
+        for i in range(screenshot_count):
+            screenshot_url = input(f"Screenshot {i+1} URL (http://...): ")
+            if screenshot_url.startswith('http'):
+                app['screenshots'].append(screenshot_url)
+    else:
+        screenshot_count = int(input("How many screenshots to add? (0-10): ") or "0")
+        for i in range(screenshot_count):
+            screenshot = select_or_add_image(f"Screenshot {i+1}", SCREENSHOTS_DIR)
+            if screenshot:
+                app['screenshots'].append(screenshot)
     
     # Handle App Preview Photos (minimum 2 required)
     print("\n🖼️ APP PREVIEW PHOTOS (Main preview images shown in store)")
     print("⚠️ Minimum 2 preview photos required for publishing!")
     app['app_preview_photos'] = []
     
-    for i in range(2):
-        preview = select_or_add_image(f"Preview Photo {i+1} (Required)", SCREENSHOTS_DIR, required=True)
-        if preview:
-            app['app_preview_photos'].append(preview)
-    
-    # Optional additional previews
-    while len(app['app_preview_photos']) < 5:
-        add_more = input(f"\nAdd preview photo {len(app['app_preview_photos'])+1}? (yes/no): ")
-        if add_more.lower() != 'yes':
-            break
-        preview = select_or_add_image(f"Preview Photo {len(app['app_preview_photos'])+1}", SCREENSHOTS_DIR)
-        if preview:
-            app['app_preview_photos'].append(preview)
+    if is_premium:
+        for i in range(2):
+            preview_url = input(f"Preview Photo {i+1} URL (Required) (http://...): ")
+            if preview_url.startswith('http'):
+                app['app_preview_photos'].append(preview_url)
+        
+        # Optional additional previews
+        while len(app['app_preview_photos']) < 5:
+            add_more = input(f"\nAdd preview photo {len(app['app_preview_photos'])+1}? (yes/no): ")
+            if add_more.lower() != 'yes':
+                break
+            preview_url = input(f"Preview Photo {len(app['app_preview_photos'])+1} URL (http://...): ")
+            if preview_url.startswith('http'):
+                app['app_preview_photos'].append(preview_url)
+    else:
+        for i in range(2):
+            preview = select_or_add_image(f"Preview Photo {i+1} (Required)", SCREENSHOTS_DIR, required=True)
+            if preview:
+                app['app_preview_photos'].append(preview)
+        
+        # Optional additional previews
+        while len(app['app_preview_photos']) < 5:
+            add_more = input(f"\nAdd preview photo {len(app['app_preview_photos'])+1}? (yes/no): ")
+            if add_more.lower() != 'yes':
+                break
+            preview = select_or_add_image(f"Preview Photo {len(app['app_preview_photos'])+1}", SCREENSHOTS_DIR)
+            if preview:
+                app['app_preview_photos'].append(preview)
     
     # Tags
     tags_input = input("\n🏷️ Tags (comma-separated): ")
@@ -2492,13 +2552,45 @@ def add_app():
     
     # Download link and app file
     print("\n📦 APP FILE")
-    print("Choose how to specify the app file:")
-    print("1. Select from existing files in Apps_Link folder")
-    print("2. Copy a new file to Apps_Link folder")
-    print("3. Enter file name (file should already exist in Apps_Link)")
-    print("4. Skip (no download)")
-    
-    file_choice = input("\nSelect option (1-4): ")
+    if is_premium:
+        print("Choose how to specify the download:")
+        print("1. Enter external download URL")
+        print("2. Upload to file hosting service later")
+        print("3. Skip (no download)")
+        
+        file_choice = input("\nSelect option (1-3): ")
+        if file_choice == "1":
+            download_url = input("Enter external download URL (http://...): ")
+            if download_url.startswith('http'):
+                app['download_link'] = download_url
+                app['is_external_download'] = True
+                app['app_file'] = "External"
+                app['app_file_path'] = download_url
+            else:
+                print("Invalid URL.")
+                app['download_link'] = "#"
+                app['is_external_download'] = False
+                app['app_file'] = ""
+                app['app_file_path'] = ""
+        elif file_choice == "2":
+            app['download_link'] = "#pending"
+            app['is_external_download'] = True
+            app['app_file'] = "Pending"
+            app['app_file_path'] = ""
+        else:
+            app['download_link'] = "#"
+            app['is_external_download'] = False
+            app['app_file'] = ""
+            app['app_file_path'] = ""
+        file_choice = "skip"  # Skip the regular file handling
+    else:
+        print("Choose how to specify the app file:")
+        print("1. Select from existing files in Apps_Link folder")
+        print("2. Copy a new file to Apps_Link folder")
+        print("3. Enter file name (file should already exist in Apps_Link)")
+        print("4. Skip (no download)")
+        
+        file_choice = input("\nSelect option (1-4): ")
     
     if file_choice == "1":
         app_files = list_files_in_directory(APPS_LINK_DIR, ['apk', 'zip', 'exe', 'dmg', 'rar', 'msi', 'deb', 'pkg'])
@@ -2565,12 +2657,15 @@ def add_app():
             app['app_file_path'] = str(file_path)
     
     else:
-        app['app_file'] = ""
-        app['app_file_path'] = ""
-        print("No app file specified.")
+        if not is_premium:
+            app['app_file'] = ""
+            app['app_file_path'] = ""
+            print("No app file specified.")
     
-    # Set download link
-    app['download_link'] = f"/download/{app['id']}" if app.get('app_file') else "#"
+    # Set download link for regular apps
+    if not is_premium and file_choice != "skip":
+        app['download_link'] = f"/download/{app['id']}" if app.get('app_file') else "#"
+        app['is_external_download'] = False
     
     # Pricing and monetization
     app['price'] = input("\n💰 Price (0 for free, or amount): ") or "0"

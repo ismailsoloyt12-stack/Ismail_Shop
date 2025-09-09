@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Premium Unlocked Apps - Game & App Store{% endblock %}
+
+{% block content %}
+<style>
+    /* Premium Unlocked - Clean, no animations */
+    .premium-header {
+        background: #f4f6fb; /* subtle neutral background */
+        padding: 32px 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        border: 1px solid #e6e9f2;
+    }
+
+    .premium-header .unlock-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+
+    .premium-header h1 {
+        color: #1f2937;
+        font-size: 1.75rem;
+        margin: 0 0 8px 0;
+        font-weight: 700;
+    }
+
+    .premium-description {
+        color: #4b5563;
+        font-size: 1rem;
+        max-width: 900px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .premium-notice {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #f59e0b; /* amber */
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 16px;
+    }
+
+    .premium-notice p {
+        color: #374151;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .premium-notice .notice-icon {
+        color: #f59e0b;
+        margin-right: 8px;
+    }
+
+    /* Cards */
+    .premium-apps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+    }
+
+    .premium-app-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .premium-app-card a { display: block; color: inherit; text-decoration: none; }
+
+    .premium-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #111827;
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .premium-app-icon {
+        width: 100%;
+        height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
+        border-bottom: 1px solid #f0f1f5;
+    }
+
+    .premium-app-icon img {
+        width: 78px;
+        height: 78px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 1px solid #e5e7eb;
+    }
+
+    .premium-app-info { padding: 12px; }
+
+    .premium-app-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .premium-app-developer {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .mod-features {
+        background: #f9fafb;
+        border-radius: 6px;
+        padding: 8px;
+        margin: 8px 0;
+        font-size: 0.85rem;
+        color: #374151;
+        border: 1px solid #eef0f4;
+    }
+
+    .mod-features strong { display: block; margin-bottom: 3px; color: #1f2937; }
+
+    .premium-app-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #f0f1f5;
+    }
+
+    .premium-app-rating { display: flex; align-items: center; gap: 5px; color: #111827; }
+
+    .premium-app-rating .stars { color: #f59e0b; }
+
+    .premium-price-badge {
+        background: #065f46; /* deep green */
+        color: #ecfdf5;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    .original-price { text-decoration: line-through; color: #9ca3af; font-size: 0.8rem; margin-right: 6px; }
+
+    /* Empty State */
+    .premium-empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin: 24px auto;
+        max-width: 600px;
+        color: #374151;
+    }
+
+    .premium-empty-state i { font-size: 40px; color: #6b7280; margin-bottom: 10px; }
+    .premium-empty-state h3 { color: #111827; margin-bottom: 6px; }
+    .premium-empty-state p { color: #4b5563; font-size: 0.95rem; }
+
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+        .premium-header { background: #111827; border-color: #1f2937; }
+        .premium-header h1 { color: #f3f4f6; }
+        .premium-description { color: #9ca3af; }
+        .premium-notice { background: #0f172a; border-color: #334155; }
+        .premium-notice p { color: #e5e7eb; }
+        .premium-app-card { background: #0f172a; border-color: #1f2937; }
+        .premium-app-icon { background: #111827; border-bottom-color: #1f2937; }
+        .premium-app-icon img { border-color: #1f2937; }
+        .premium-app-name { color: #f3f4f6; }
+        .premium-app-developer { color: #9ca3af; }
+        .mod-features { background: #0b1220; border-color: #1f2937; color: #e5e7eb; }
+        .premium-app-meta { border-top-color: #1f2937; }
+        .premium-empty-state { background: #0f172a; border-color: #1f2937; color: #e5e7eb; }
+        .premium-empty-state i { color: #9ca3af; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .premium-apps-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .premium-header { padding: 24px 16px; }
+        .premium-header h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<div class="premium-container">
+    <div class="premium-header">
+        <div class="unlock-icon">🔓</div>
+        <h1>Premium Unlocked</h1>
+        <p class="premium-description">
+            Discover premium applications with all features unlocked and available for free. 
+            These are modified versions of paid apps from various sources, carefully collected 
+            to provide you with the full premium experience.
+        </p>
+        <div class="premium-notice">
+            <p>
+                <i class="fas fa-info-circle notice-icon"></i>
+                <strong>Notice:</strong> These apps are not created by us but are gathered from external sources. 
+                Please use them responsibly and consider supporting the original developers.
+            </p>
+        </div>
+    </div>
+    
+    <div class="premium-apps-grid">
+        {% if apps %}
+            {% for app in apps %}
+            <div class="premium-app-card">
+                <span class="premium-badge">PREMIUM</span>
+                <a href="{{ url_for('app_detail', app_id=app.id) }}">
+                    <div class="premium-app-icon">
+                        {% if app.is_external_icon and app.icon.startswith('http') %}
+                            <img src="{{ app.icon }}" 
+                                 alt="{{ app.name }}"
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                                 alt="{{ app.name }}"
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                        {% endif %}
+                    </div>
+                    <div class="premium-app-info">
+                        <h3 class="premium-app-name">{{ app.name }}</h3>
+                        <p class="premium-app-developer">{{ app.developer }}</p>
+                        
+                        {% if app.mod_features %}
+                        <div class="mod-features">
+                            <strong>Mod Features:</strong>
+                            {{ app.mod_features }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if app.original_source %}
+                        <p style="font-size: 0.8rem; color: #888; margin: 5px 0;">
+                            <i class="fas fa-globe"></i> {{ app.original_source }}
+                        </p>
+                        {% endif %}
+                        
+                        <div class="premium-app-meta">
+                            <div class="premium-app-rating">
+                                <span class="stars">
+                                    {% for i in range(5) %}
+                                        {% if i < app.rating|int %}
+                                            <i class="fas fa-star"></i>
+                                        {% elif i < app.rating %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <span>{{ "%.1f"|format(app.rating) }}</span>
+                            </div>
+                            <div class="premium-price-badge">
+                                {% if app.price != "0" %}
+                                    <span class="original-price">${{ app.price }}</span>
+                                {% endif %}
+                                FREE
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="premium-empty-state" style="grid-column: 1 / -1;">
+                <i class="fas fa-lock-open"></i>
+                <h3>No Premium Unlocked Apps Yet</h3>
+                <p>Premium unlocked applications will appear here once added to the store.</p>
+                <p style="font-size: 0.9rem; margin-top: 15px; color: #888;">
+                    Use the manage apps panel to add external premium apps with all features unlocked.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

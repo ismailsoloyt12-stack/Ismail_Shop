@@ -1,0 +1,98 @@
+<!-- Professional Download Popup -->
+<div id="downloadPopup" class="download-popup">
+    <div class="download-popup-content">
+        <div class="download-header">
+            <div class="download-icon-wrapper">
+                <i class="fas fa-cloud-download-alt"></i>
+            </div>
+            <h2 class="download-title">Downloading {{ app.name }}</h2>
+            <p class="download-subtitle">Please wait while we prepare your download</p>
+        </div>
+        
+        <div class="download-progress">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+            </div>
+            
+            <div class="progress-steps">
+                <div class="progress-step" id="step1">
+                    <div class="step-indicator">
+                        <div class="step-circle">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-text">Connecting to server</span>
+                        <span class="step-status"></span>
+                    </div>
+                </div>
+                
+                <div class="progress-step" id="step2">
+                    <div class="step-indicator">
+                        <div class="step-circle">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-text">Locating file</span>
+                        <span class="step-status"></span>
+                    </div>
+                </div>
+                
+                <div class="progress-step" id="step3">
+                    <div class="step-indicator">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-text">Verifying integrity</span>
+                        <span class="step-status"></span>
+                    </div>
+                </div>
+                
+                <div class="progress-step" id="step4">
+                    <div class="step-indicator">
+                        <div class="step-circle">
+                            <i class="fas fa-download"></i>
+                        </div>
+                    </div>
+                    <div class="step-content">
+                        <span class="step-text">Initiating download</span>
+                        <span class="step-status"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-app-info">
+            {% if app.category == 'Premium Unlocked' and app.icon and app.icon.startswith('http') %}
+                <img src="{{ app.icon }}" 
+                     alt="{{ app.name }}" class="download-app-icon"
+                     onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                     alt="{{ app.name }}" class="download-app-icon"
+                     onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+            {% endif %}
+            <div class="download-app-details">
+                <h3>{{ app.name }}</h3>
+                <p class="app-dev">{{ app.developer }}</p>
+                <div class="app-meta">
+                    <span class="meta-item"><i class="fas fa-hdd"></i> {{ app.size }}</span>
+                    <span class="meta-item"><i class="fas fa-code-branch"></i> v{{ app.version|default('1.0.0') }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <button class="close-popup-btn" onclick="closeDownloadPopup()" style="display: none;">
+            <i class="fas fa-check-circle"></i> Done
+        </button>
+    </div>
+</div>

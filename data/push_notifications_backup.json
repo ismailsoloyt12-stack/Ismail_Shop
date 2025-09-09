@@ -1,5 +1,22 @@
 [
   {
+    "id": "0723a844-77fc-4ef1-aa60-84028299b4b5",
+    "title": "hello",
+    "message": "hello to thhe app",
+    "type": "info",
+    "icon": "ℹ️",
+    "link": "",
+    "target_audience": "all",
+    "created_at": "2025-09-08T21:31:44.887222",
+    "expires_at": "2025-09-15T21:31:44.887278",
+    "display_after": "2025-09-08T21:32:44.887302",
+    "priority": "normal",
+    "read_by": [],
+    "click_count": 0,
+    "dismiss_count": 0,
+    "active": true
+  },
+  {
     "id": "eb8489ed-06a3-45f9-86fe-78daf1f07b79",
     "title": "Hello hero",
     "message": "hi there did you like the website? did you know that this website createn by \"ismail_Mohammad from bangladesh? if you know so please donate me!",

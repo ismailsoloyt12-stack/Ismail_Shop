@@ -12,13 +12,40 @@
     <div class="apps-grid">
         {% if apps %}
             {% for app in apps %}
-            <div class="app-card">
+            <div class="app-card{% if app.category == 'Premium Unlocked' %} premium-unlocked-card{% endif %}">
                 <a href="{{ url_for('app_detail', app_id=app.id) }}">
-                    <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
-                         alt="{{ app.name }}" class="app-icon"
-                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    {% if app.category == 'Premium Unlocked' %}
+                        <!-- Premium Unlocked apps use external URLs for images -->
+                        {% if app.icon and app.icon.startswith('http') %}
+                            <img src="{{ app.icon }}" 
+                                 alt="{{ app.name }}" class="app-icon"
+                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default_icon.png') }}" 
+                                 alt="{{ app.name }}" class="app-icon">
+                        {% endif %}
+                        
+                        <!-- Premium badge -->
+                        <div class="premium-badge">
+                            <i class="fas fa-crown"></i> PREMIUM
+                        </div>
+                    {% else %}
+                        <!-- Regular apps use local file paths -->
+                        <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                             alt="{{ app.name }}" class="app-icon"
+                             onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                    {% endif %}
+                    
                     <h3>{{ app.name }}</h3>
                     <p>{{ app.developer }}</p>
+                    
+                    {% if app.category == 'Premium Unlocked' and app.get('mod_features') %}
+                        <div class="mod-features">
+                            <strong>MOD Features:</strong>
+                            {{ app.mod_features }}
+                        </div>
+                    {% endif %}
+                    
                     <div class="app-rating">
                         {% for i in range(5) %}
                             {% if i < app.rating|int %}
@@ -29,8 +56,11 @@
                         {% endfor %}
                         <span>{{ "%.1f"|format(app.rating) }}</span>
                     </div>
+                    
                     <div class="app-price">
-                        {% if app.price == "0" %}
+                        {% if app.category == 'Premium Unlocked' %}
+                            <span class="premium-unlocked-badge">UNLOCKED</span>
+                        {% elif app.price == "0" %}
                             <span class="free-badge">FREE</span>
                         {% else %}
                             <span class="price">${{ app.price }}</span>
@@ -48,4 +78,88 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Styles for Premium Unlocked category -->
+<style>
+/* Premium Unlocked specific styles */
+.premium-unlocked-card {
+    position: relative;
+    border: 2px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+    border-radius: 15px;
+}
+
+.premium-unlocked-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
+}
+
+.premium-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.premium-badge i {
+    font-size: 0.6rem;
+}
+
+.premium-unlocked-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.mod-features {
+    background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+    border: 1px solid #667eea30;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 8px 0;
+    font-size: 0.75rem;
+    color: #667eea;
+}
+
+.mod-features strong {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .premium-badge {
+        font-size: 0.6rem;
+        padding: 3px 6px;
+    }
+    
+    .premium-unlocked-badge {
+        font-size: 0.65rem;
+        padding: 3px 10px;
+    }
+    
+    .mod-features {
+        font-size: 0.7rem;
+        padding: 6px 8px;
+    }
+}
+</style>
 {% endblock %}

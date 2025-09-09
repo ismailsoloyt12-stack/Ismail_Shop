@@ -164,6 +164,124 @@
         </div>
     </section>
     
+    <!-- Premium Unlocked Section (if available) -->
+    {% if has_premium_apps %}
+    <section class="premium-unlocked-section" style="margin-bottom: 40px;">
+        <div class="section-header">
+            <h2><i class="fas fa-unlock-alt" style="color: #667eea;"></i> Premium Unlocked</h2>
+            <a href="{{ url_for('category', category_name='Premium Unlocked') }}" class="view-all" style="color: #667eea;">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        
+        <div class="premium-card-container">
+            <a href="{{ url_for('category', category_name='Premium Unlocked') }}" class="premium-category-card">
+                <div class="premium-card-content">
+                    <div class="premium-icon-wrapper">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="premium-text">
+                        <h3>Premium Apps Unlocked</h3>
+                        <p>Access premium features for free</p>
+                    </div>
+                    <div class="premium-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+    
+    <style>
+        .premium-card-container {
+            margin-top: 20px;
+        }
+        
+        .premium-category-card {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .premium-category-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .premium-category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .premium-card-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .premium-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .premium-text h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .premium-text p {
+            margin: 5px 0 0 0;
+            opacity: 0.95;
+            font-size: 1rem;
+        }
+        
+        .premium-arrow {
+            font-size: 24px;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .premium-category-card {
+                padding: 20px;
+            }
+            
+            .premium-text h3 {
+                font-size: 1.2rem;
+            }
+            
+            .premium-text p {
+                font-size: 0.9rem;
+            }
+            
+            .premium-icon-wrapper {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+        }
+    </style>
+    {% endif %}
+    
     <!-- Categories Section -->
     <section class="categories-section">
         <div class="section-header">
