@@ -21,7 +21,7 @@
     "created_at": "2025-09-07T20:07:53.286248",
     "auth_provider": "firebase",
     "favorites": [],
-    "last_login": "2025-09-07T22:56:45.375805"
+    "last_login": "2025-09-09T16:57:27.696593"
   },
   "firebase_xqSKdbvadxYKkTEJwOnU8b0SO4R2": {
     "username": "ISMAIL Muhammad",
@@ -35,6 +35,17 @@
     "favorites": [
       "c3a86114-f0cc-411d-81cb-cc3b350651a1"
     ],
-    "last_login": "2025-09-07T23:52:38.138337"
+    "last_login": "2025-09-09T17:01:41.199213"
+  },
+  "firebase_uIKo3YITdnOTzXq05isTz0ssQ843": {
+    "username": "Ismail Solom",
+    "email": "ismailsolom@gmail.com",
+    "password": "pbkdf2:sha256:600000$3flO33mkULqx9Gi6$cd88a43d1aab1b70665062117b732767d297572fd07ef3896b50d73b89e9afc7",
+    "firebase_uid": "uIKo3YITdnOTzXq05isTz0ssQ843",
+    "display_name": "Ismail Solom",
+    "photo_url": "https://lh3.googleusercontent.com/a/ACg8ocJ_hVDcmagOUgI8_QIxQgGSTNv7da_GCc9uo2Gp57o2C_OjEw=s96-c",
+    "created_at": "2025-09-09T16:55:38.648640",
+    "auth_provider": "firebase",
+    "favorites": []
   }
 }

@@ -40,8 +40,8 @@
     <!-- Hero Banner -->
     <section class="hero-section">
         <div class="hero-content">
-            <h1>Welcome to ismail store</h1>
-            <p>Discover amazing apps and games for your device. From productivity tools to entertainment, find everything you need in one place.</p>
+            <h1>&nbsp;</h1>
+            <p>&nbsp;</p>
             <div class="hero-features">
                 <div class="hero-feature">
                     <i class="fas fa-download"></i>
@@ -72,9 +72,10 @@
                 <div class="app-card" data-app-id="{{ app.id }}">
                     <a href="{{ url_for('app_detail', app_id=app.id) }}" class="app-link">
                         <div class="app-icon">
+                            {% set default_icon = url_for('static', filename='images/default_icon.png') %}
                             <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
                                  alt="{{ app.name }}" 
-                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                                 onError="if (this.src != '{{ default_icon }}') this.src = '{{ default_icon }}'">
                         </div>
                         <div class="app-info">
                             <h3 class="app-name">{{ app.name }}</h3>
@@ -129,9 +130,10 @@
                 <div class="app-card" data-app-id="{{ app.id }}">
                     <a href="{{ url_for('app_detail', app_id=app.id) }}" class="app-link">
                         <div class="app-icon">
+                            {% set default_icon = url_for('static', filename='images/default_icon.png') %}
                             <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
                                  alt="{{ app.name }}"
-                                 onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                                 onError="if (this.src != '{{ default_icon }}') this.src = '{{ default_icon }}'">
                         </div>
                         <div class="app-info">
                             <h3 class="app-name">{{ app.name }}</h3>

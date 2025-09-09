@@ -14,9 +14,10 @@
             {% for app in apps %}
             <div class="app-card">
                 <a href="{{ url_for('app_detail', app_id=app.id) }}">
+                    {% set default_icon = url_for('static', filename='images/default_icon.png') %}
                     <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
                          alt="{{ app.name }}" class="app-icon"
-                         onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                         onError="if (this.src != '{{ default_icon }}') this.src = '{{ default_icon }}'">
                     <h3>{{ app.name }}</h3>
                     <p>{{ app.developer }}</p>
                     <div class="app-meta">
