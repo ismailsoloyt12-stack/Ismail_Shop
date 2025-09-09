@@ -156,7 +156,7 @@
             this.initializeState();
             this.setupMobileCloseButton();
             this.setupSwipeGestures();
-            this.setupFocusTrap();
+            // Removed setupFocusTrap() call - focus trap is handled in open() method
         },
 
         createOverlay() {
@@ -315,6 +315,12 @@
                 Elements.sidebar.removeEventListener('keydown', this.handleTrapFocus);
                 this.handleTrapFocus = null;
             }
+        },
+
+        // Added missing setupFocusTrap method to prevent errors
+        setupFocusTrap() {
+            // Focus trap is handled by trapFocus() method when sidebar opens
+            // This empty method prevents "function not defined" errors
         },
 
         setupSwipeGestures() {
