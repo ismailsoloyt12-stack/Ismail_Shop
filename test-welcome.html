@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Welcome & Onboarding</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        .description {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #16a34a;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .status {
+            margin-top: 30px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+        }
+        .status h3 {
+            margin: 0 0 8px 0;
+            color: #111827;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status p {
+            margin: 4px 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .status code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Welcome & Onboarding Test Page</h1>
+        <p class="description">
+            Use this page to test the welcome notification and onboarding tour features.
+            The buttons below will help you reset and control the user experience.
+        </p>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="resetAndGoToSite()">
+                Reset & Go to Site (New User)
+            </button>
+            <button class="btn-secondary" onclick="showCurrentStatus()">
+                Show Current Status
+            </button>
+            <button class="btn-secondary" onclick="resetWelcomeOnly()">
+                Reset Welcome Only
+            </button>
+            <button class="btn-secondary" onclick="resetTourOnly()">
+                Reset Tour Only
+            </button>
+            <button class="btn-danger" onclick="clearAllData()">
+                Clear All Data
+            </button>
+        </div>
+        
+        <div class="status" id="statusDisplay" style="display: none;">
+            <h3>Current Status</h3>
+            <div id="statusContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function resetAndGoToSite() {
+            // Clear the user state to simulate a new user
+            localStorage.removeItem('ismailStore_userState');
+            alert('User state reset! You will now see the welcome notification and tour as a new user.');
+            // Go to the main site
+            window.location.href = '/';
+        }
+        
+        function showCurrentStatus() {
+            const state = localStorage.getItem('ismailStore_userState');
+            const statusDiv = document.getElementById('statusDisplay');
+            const contentDiv = document.getElementById('statusContent');
+            
+            statusDiv.style.display = 'block';
+            
+            if (state) {
+                const parsed = JSON.parse(state);
+                contentDiv.innerHTML = `
+                    <p><strong>Is New User:</strong> <code>${parsed.isNewUser}</code></p>
+                    <p><strong>Has Seen Welcome:</strong> <code>${parsed.hasSeenWelcome}</code></p>
+                    <p><strong>Has Completed Tour:</strong> <code>${parsed.hasCompletedTour}</code></p>
+                    <p><strong>Current Tour Step:</strong> <code>${parsed.tourStep}</code></p>
+                `;
+            } else {
+                contentDiv.innerHTML = '<p>No user state found. User will be treated as new.</p>';
+            }
+        }
+        
+        function resetWelcomeOnly() {
+            const state = localStorage.getItem('ismailStore_userState');
+            let userState = state ? JSON.parse(state) : {
+                isNewUser: true,
+                hasSeenWelcome: false,
+                hasCompletedTour: false,
+                tourStep: 0
+            };
+            
+            userState.hasSeenWelcome = false;
+            localStorage.setItem('ismailStore_userState', JSON.stringify(userState));
+            alert('Welcome notification reset! Refresh the main site to see it again.');
+        }
+        
+        function resetTourOnly() {
+            const state = localStorage.getItem('ismailStore_userState');
+            let userState = state ? JSON.parse(state) : {
+                isNewUser: true,
+                hasSeenWelcome: false,
+                hasCompletedTour: false,
+                tourStep: 0
+            };
+            
+            userState.hasCompletedTour = false;
+            userState.tourStep = 0;
+            localStorage.setItem('ismailStore_userState', JSON.stringify(userState));
+            alert('Tour reset! The onboarding tour will show again after the welcome notification.');
+        }
+        
+        function clearAllData() {
+            if (confirm('This will clear ALL localStorage data for this site. Are you sure?')) {
+                localStorage.clear();
+                alert('All data cleared!');
+                showCurrentStatus();
+            }
+        }
+        
+        // Show status on load
+        window.addEventListener('load', showCurrentStatus);
+    </script>
+</body>
+</html>

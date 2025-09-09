@@ -1,0 +1,497 @@
+/* Welcome Notification and Onboarding Tour Styles */
+
+:root {
+  --ioz-accent: #22c55e; /* green */
+  --ioz-accent-strong: #16a34a;
+  --ioz-bg: #ffffff;
+  --ioz-fg: #111827;
+  --ioz-muted: #6b7280;
+  --ioz-surface: #f9fafb;
+  --ioz-shadow: rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] {
+  --ioz-bg: #0f0f0f;
+  --ioz-fg: #e5e7eb;
+  --ioz-muted: #9ca3af;
+  --ioz-surface: #111318;
+  --ioz-shadow: rgba(0,0,0,0.4);
+}
+
+/* -----------------------------
+   Welcome Notification
+------------------------------ */
+.welcome-notification {
+  position: fixed;
+  z-index: 9000;
+  right: 20px;
+  bottom: 20px;
+  width: min(420px, calc(100vw - 24px));
+  background: var(--ioz-bg);
+  color: var(--ioz-fg);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px var(--ioz-shadow);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .welcome-notification {
+  border-color: rgba(255,255,255,0.08);
+}
+
+.welcome-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.welcome-notification .notification-content {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.welcome-notification .notification-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.06));
+  border-radius: 12px;
+  color: var(--ioz-accent);
+}
+
+.welcome-notification .notification-text h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.welcome-notification .notification-text p {
+  margin: 0;
+  color: var(--ioz-muted);
+  font-size: 14px;
+}
+
+.welcome-notification .notification-close {
+  background: transparent;
+  border: none;
+  color: var(--ioz-muted);
+  font-size: 16px;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.welcome-notification .notification-close:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+[data-theme="dark"] .welcome-notification .notification-close:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.welcome-notification .notification-progress {
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--ioz-accent), var(--ioz-accent-strong));
+  transform-origin: left;
+  animation: ioz-progress 6s linear forwards;
+}
+
+@keyframes ioz-progress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* -----------------------------
+   Onboarding Welcome Screen
+------------------------------ */
+.onboarding-welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.onboarding-welcome.show { opacity: 1; }
+
+.onboarding-welcome .onboarding-welcome-content {
+  width: min(560px, calc(100vw - 32px));
+  background: var(--ioz-bg);
+  color: var(--ioz-fg);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px var(--ioz-shadow);
+  padding: 28px;
+  text-align: center;
+  transform: translateY(10px);
+  transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .onboarding-welcome .onboarding-welcome-content {
+  border-color: rgba(255,255,255,0.08);
+}
+
+.onboarding-welcome.show .onboarding-welcome-content { transform: translateY(0); }
+
+.onboarding-welcome .welcome-animation {
+  width: 72px;
+  height: 72px;
+  margin: 8px auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ioz-accent);
+  background: radial-gradient( circle at 30% 30%, rgba(34,197,94,0.25), rgba(34,197,94,0.05) 70%);
+}
+
+.onboarding-welcome h2 {
+  margin: 8px 0 6px;
+  font-weight: 800;
+}
+
+.onboarding-welcome p { color: var(--ioz-muted); margin: 0 0 18px; }
+
+.onboarding-welcome .welcome-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary { background: var(--ioz-accent); color: white; }
+.btn-primary:hover { background: var(--ioz-accent-strong); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ioz-fg);
+  border-color: rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .btn-secondary { border-color: rgba(255,255,255,0.12); }
+.btn-secondary:hover { background: rgba(0,0,0,0.05); }
+[data-theme="dark"] .btn-secondary:hover { background: rgba(255,255,255,0.06); }
+
+/* -----------------------------
+   Tour Overlay + Highlight
+------------------------------ */
+body.tour-active { overflow: hidden; }
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: auto;
+}
+
+/* Spotlight hole using pseudo-element and huge box-shadow */
+.tour-overlay::before {
+  content: '';
+  position: absolute;
+  top: var(--highlight-top, 40%);
+  left: var(--highlight-left, 40%);
+  width: var(--highlight-width, 120px);
+  height: var(--highlight-height, 120px);
+  border-radius: 9999px; /* circular/elliptical spotlight */
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  outline: 2px solid var(--ioz-accent);
+  outline-offset: 6px;
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+  pointer-events: none;
+}
+
+/* Ring glow on the actual element too */
+.tour-highlight {
+  position: relative;
+  z-index: 10001 !important;
+  transition: all 0.3s ease;
+}
+
+/* Circle marker animation */
+.tour-circle-marker {
+  position: fixed;
+  z-index: 10001;
+  border: 3px solid var(--ioz-accent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: circleMarkerPulse 2s ease-in-out infinite;
+}
+
+@keyframes circleMarkerPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+/* Pulse highlight effect */
+.tour-highlight-pulse {
+  animation: highlightPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes highlightPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.8);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(34,197,94,0);
+  }
+}
+
+/* Glow highlight effect */
+.tour-highlight-glow {
+  box-shadow: 0 0 20px rgba(34,197,94,0.6), 0 0 40px rgba(34,197,94,0.4);
+  border: 2px solid rgba(34,197,94,0.8);
+  border-radius: 8px;
+}
+
+/* -----------------------------
+   Tour Tooltip
+------------------------------ */
+.tour-tooltip {
+  position: fixed;
+  z-index: 10002;
+  width: min(440px, calc(100vw - 24px));
+  background: var(--ioz-bg);
+  color: var(--ioz-fg);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px var(--ioz-shadow);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+[data-theme="dark"] .tour-tooltip { border-color: rgba(255,255,255,0.08); }
+
+.tour-tooltip.show { opacity: 1; transform: translateY(0); }
+
+.tour-tooltip .tooltip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 0 14px;
+}
+
+.tour-tooltip .tooltip-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.tour-tooltip .tooltip-close {
+  background: transparent;
+  border: none;
+  color: var(--ioz-muted);
+  font-size: 16px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.tour-tooltip .tooltip-close:hover { background: rgba(0,0,0,0.05); }
+[data-theme="dark"] .tour-tooltip .tooltip-close:hover { background: rgba(255,255,255,0.06); }
+
+.tour-tooltip .tooltip-content { padding: 8px 14px 6px; }
+
+.tour-tooltip .typing-text {
+  min-height: 22px;
+  font-size: 14px;
+  color: var(--ioz-muted);
+  white-space: normal;
+}
+
+.tour-tooltip .tooltip-footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 12px;
+}
+
+.tour-tooltip .tooltip-actions { display: flex; gap: 8px; }
+
+.tour-tooltip .tooltip-progress { font-size: 12px; color: var(--ioz-muted); }
+
+.tour-tooltip .progress-bar {
+  margin-top: 6px;
+  height: 6px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .tour-tooltip .progress-bar { background: rgba(255,255,255,0.08); }
+
+.tour-tooltip .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ioz-accent), var(--ioz-accent-strong));
+}
+
+/* -----------------------------
+   Tour Completion Screen
+------------------------------ */
+.tour-completion {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tour-completion.show { opacity: 1; }
+
+.tour-completion .completion-content {
+  width: min(480px, calc(100vw - 32px));
+  background: var(--ioz-bg);
+  color: var(--ioz-fg);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px var(--ioz-shadow);
+  padding: 32px;
+  text-align: center;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .tour-completion .completion-content {
+  border-color: rgba(255,255,255,0.08);
+}
+
+.tour-completion.show .completion-content { 
+  transform: scale(1);
+  animation: celebrationBounce 0.6s ease-out;
+}
+
+@keyframes celebrationBounce {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.tour-completion .completion-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--ioz-accent), var(--ioz-accent-strong));
+  border-radius: 50%;
+  color: white;
+  font-size: 40px;
+  animation: iconRotate 0.6s ease-out;
+}
+
+@keyframes iconRotate {
+  from { transform: rotate(-360deg) scale(0); }
+  to { transform: rotate(0) scale(1); }
+}
+
+.tour-completion h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.tour-completion p {
+  margin: 0 0 24px;
+  color: var(--ioz-muted);
+  font-size: 16px;
+}
+
+/* Typing text cursor effect */
+.typing-text::after {
+  content: '|';
+  opacity: 1;
+  animation: cursorBlink 1s infinite;
+  color: var(--ioz-accent);
+  font-weight: bold;
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Button styles for tour */
+.btn-next, .btn-back {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-next {
+  background: var(--ioz-accent);
+  color: white;
+}
+
+.btn-next:hover {
+  background: var(--ioz-accent-strong);
+  transform: translateX(2px);
+}
+
+.btn-back {
+  background: transparent;
+  color: var(--ioz-muted);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] .btn-back {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.btn-back:hover {
+  background: rgba(0,0,0,0.05);
+  transform: translateX(-2px);
+}
+
+[data-theme="dark"] .btn-back:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .welcome-notification .notification-content { grid-template-columns: 48px 1fr auto; }
+  .welcome-notification .notification-icon { width: 48px; height: 48px; }
+  .tour-tooltip { width: min(94vw, 420px); }
+  .onboarding-welcome .onboarding-welcome-content { padding: 22px; }
+  .tour-completion .completion-content { padding: 24px; }
+  .tour-circle-marker { border-width: 2px; }
+}
+

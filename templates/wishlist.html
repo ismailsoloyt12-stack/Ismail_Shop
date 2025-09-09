@@ -1,0 +1,592 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist - Ismail Store{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/helpful-reviews.css') }}">
+<style>
+/* Wishlist Specific Styles */
+.wishlist-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.wishlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    color: white;
+}
+
+.wishlist-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wishlist-title h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.wishlist-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+}
+
+.wishlist-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.wishlist-action-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.wishlist-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.wishlist-apps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.app-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.app-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.app-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+}
+
+.app-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.app-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.app-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.app-developer {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.app-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.app-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #ffc107;
+}
+
+.app-downloads {
+    color: #666;
+}
+
+.app-description {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.app-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-install {
+    flex: 1;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-install:hover {
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.wishlist-btn {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+}
+
+.wishlist-btn:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.wishlist-btn.in-wishlist {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+}
+
+.empty-wishlist {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.empty-wishlist i {
+    font-size: 4rem;
+    color: #ddd;
+    margin-bottom: 1.5rem;
+}
+
+.empty-wishlist h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.empty-wishlist p {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-browse {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-browse:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.wishlist-filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    background: white;
+    border: 2px solid #e0e0e0;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+/* Notification styles */
+.wishlist-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+}
+
+.wishlist-notification.show {
+    transform: translateX(0);
+}
+
+.wishlist-notification.success {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.wishlist-notification.error {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.wishlist-notification.info {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+/* Login prompt modal */
+.login-prompt-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.login-prompt-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+    margin: 1rem;
+}
+
+.login-prompt-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.login-prompt-actions .btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .wishlist-container {
+        padding: 1rem;
+    }
+    
+    .wishlist-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .wishlist-actions {
+        justify-content: center;
+    }
+    
+    .wishlist-apps {
+        grid-template-columns: 1fr;
+    }
+    
+    .app-card-actions {
+        flex-direction: column;
+    }
+    
+    .login-prompt-actions {
+        flex-direction: column;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .app-card {
+        background: #2a2a2a;
+        color: white;
+    }
+    
+    .app-info h3 {
+        color: white;
+    }
+    
+    .app-developer {
+        color: #bbb;
+    }
+    
+    .app-description {
+        color: #ccc;
+    }
+    
+    .empty-wishlist {
+        background: #2a2a2a;
+        color: white;
+    }
+    
+    .empty-wishlist h3 {
+        color: white;
+    }
+    
+    .empty-wishlist p {
+        color: #ccc;
+    }
+    
+    .filter-btn {
+        background: #2a2a2a;
+        border-color: #555;
+        color: white;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wishlist-container">
+    <!-- Wishlist Header -->
+    <div class="wishlist-header">
+        <div class="wishlist-title">
+            <i class="fas fa-heart fa-2x"></i>
+            <div>
+                <h1>My Wishlist</h1>
+                <div class="wishlist-count">{{ apps|length }} {% if apps|length == 1 %}app{% else %}apps{% endif %}</div>
+            </div>
+        </div>
+        
+        <div class="wishlist-actions">
+            {% if apps %}
+            <button class="wishlist-action-btn" onclick="window.wishlistManager.shareWishlist()">
+                <i class="fas fa-share"></i>
+                Share
+            </button>
+            <button class="wishlist-action-btn" onclick="window.wishlistManager.clearWishlist()" style="background: rgba(244, 67, 54, 0.2); border-color: rgba(244, 67, 54, 0.3);">
+                <i class="fas fa-trash"></i>
+                Clear All
+            </button>
+            {% endif %}
+            <a href="{{ url_for('index') }}" class="wishlist-action-btn">
+                <i class="fas fa-plus"></i>
+                Add More
+            </a>
+        </div>
+    </div>
+
+    {% if apps %}
+    <!-- Filters -->
+    <div class="wishlist-filters">
+        <button class="filter-btn active" onclick="filterWishlist('all')">All</button>
+        <button class="filter-btn" onclick="filterWishlist('free')">Free</button>
+        <button class="filter-btn" onclick="filterWishlist('paid')">Paid</button>
+        <button class="filter-btn" onclick="filterWishlist('games')">Games</button>
+        <button class="filter-btn" onclick="filterWishlist('apps')">Apps</button>
+    </div>
+
+    <!-- Wishlist Apps Grid -->
+    <div class="wishlist-apps">
+        {% for app in apps %}
+        <div class="app-card" data-category="{{ app.category.lower() }}" data-price="{{ app.price }}">
+            <div class="app-card-header">
+                <img src="{{ url_for('static', filename='images/app_icons/' + app.icon) }}" 
+                     alt="{{ app.name }}"
+                     class="app-icon"
+                     onerror="this.src='{{ url_for('static', filename='images/default_icon.png') }}'">
+                <div class="app-info">
+                    <h3>{{ app.name }}</h3>
+                    <p class="app-developer">{{ app.developer }}</p>
+                </div>
+            </div>
+            
+            <div class="app-stats">
+                <div class="app-rating">
+                    <i class="fas fa-star"></i>
+                    <span>{{ "%.1f"|format(app.rating) }}</span>
+                </div>
+                <div class="app-downloads">
+                    <i class="fas fa-download"></i>
+                    <span>{{ app.downloads }}</span>
+                </div>
+                {% if app.price != "0" %}
+                <div class="app-price">
+                    <i class="fas fa-tag"></i>
+                    <span>${{ app.price }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <p class="app-description">{{ app.description }}</p>
+            
+            <div class="app-card-actions">
+                <a href="{{ url_for('app_detail', app_id=app.id) }}" class="btn-install">
+                    {% if app.price == "0" %}
+                        <i class="fas fa-download"></i>
+                        Install
+                    {% else %}
+                        <i class="fas fa-shopping-cart"></i>
+                        Buy ${{ app.price }}
+                    {% endif %}
+                </a>
+                <button class="wishlist-btn in-wishlist" 
+                        data-app-id="{{ app.id }}"
+                        title="Remove from Wishlist">
+                    <i class="fas fa-heart wishlist-icon"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty Wishlist -->
+    <div class="empty-wishlist">
+        <i class="fas fa-heart-broken"></i>
+        <h3>Your wishlist is empty</h3>
+        <p>Discover amazing apps and games to add to your wishlist!</p>
+        <a href="{{ url_for('index') }}" class="btn-browse">
+            <i class="fas fa-search"></i>
+            Browse Apps
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Filter functionality
+function filterWishlist(category) {
+    const cards = document.querySelectorAll('.app-card');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    // Update active filter button
+    filterButtons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    // Filter cards
+    cards.forEach(card => {
+        const cardCategory = card.dataset.category;
+        const cardPrice = card.dataset.price;
+        let shouldShow = true;
+        
+        switch(category) {
+            case 'all':
+                shouldShow = true;
+                break;
+            case 'free':
+                shouldShow = cardPrice === '0';
+                break;
+            case 'paid':
+                shouldShow = cardPrice !== '0';
+                break;
+            case 'games':
+                shouldShow = cardCategory.includes('game');
+                break;
+            case 'apps':
+                shouldShow = !cardCategory.includes('game');
+                break;
+        }
+        
+        if (shouldShow) {
+            card.style.display = 'block';
+            card.style.animation = 'slideIn 0.3s ease';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Set current user for wishlist manager
+window.currentUser = {
+    id: '{{ current_user.id if current_user.is_authenticated else "" }}',
+    username: '{{ current_user.username if current_user.is_authenticated else "" }}'
+};
+
+// Set user's current wishlist
+window.userWishlist = {{ (current_user.wishlist if current_user.is_authenticated else []) | tojson }};
+</script>
+{% endblock %}

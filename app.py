@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash, send_file, abort, make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import json
@@ -21,10 +22,12 @@ app = Flask(__name__)
 project_path = os.path.dirname(os.path.abspath(__file__))
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 app.config['UPLOAD_FOLDER'] = 'static/images'
+app.config['AVATAR_FOLDER'] = 'static/images/avatars'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['SESSION_COOKIE_SECURE'] = False  # Set True in production with HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 # Enable CORS for API endpoints
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -104,6 +107,11 @@ def send_notification(user_id, title, message, type='info'):
         users_file = os.path.join(project_path, 'users.json')
         with open(users_file, 'w') as f:
             json.dump(users_db, f, indent=2)
+
+def allowed_file(filename):
+    """Check if file has allowed extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 # Admin decorator
 def admin_required(f):
@@ -359,10 +367,14 @@ def add_review(app_id):
         return jsonify({'error': 'App not found'}), 404
     data = request.json
     review = {
+        'id': str(uuid.uuid4()),  # Add unique ID for each review
         'user': current_user.username,
+        'user_id': current_user.id,
         'rating': data.get('rating', 5),
         'comment': data.get('comment', ''),
-        'date': datetime.now().isoformat()
+        'date': datetime.now().isoformat(),
+        'helpful_votes': 0,  # Initialize helpful votes
+        'voted_users': []  # Track who voted to prevent duplicate votes
     }
     if 'reviews' not in app_data:
         app_data['reviews'] = []
@@ -372,6 +384,27 @@ def add_review(app_id):
     app_data['review_count'] = len(app_data['reviews'])
     save_apps(apps)
     return jsonify({'success': True, 'review': review})
+
+@app.route('/api/reviews/<app_id>')
+def get_reviews(app_id):
+    """Get reviews for a specific app"""
+    apps = load_apps()
+    app_data = next((app for app in apps if app['id'] == app_id), None)
+    if not app_data:
+        return jsonify({'error': 'App not found'}), 404
+    
+    reviews = app_data.get('reviews', [])
+    # Sort reviews by date (newest first) and helpful votes
+    reviews_sorted = sorted(reviews, 
+                           key=lambda x: (x.get('helpful_votes', 0), x.get('date', '')), 
+                           reverse=True)
+    
+    return jsonify({
+        'success': True,
+        'reviews': reviews_sorted,
+        'total': len(reviews),
+        'average_rating': app_data.get('rating', 0)
+    })
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -500,6 +533,14 @@ def favorites():
     favorite_apps = [app for app in apps if app['id'] in user_favorites]
     return render_template('favorites.html', apps=favorite_apps)
 
+@app.route('/wishlist')
+@login_required
+def wishlist():
+    apps = load_apps()
+    user_wishlist = users_db.get(current_user.id, {}).get('wishlist', [])
+    wishlist_apps = [app for app in apps if app['id'] in user_wishlist]
+    return render_template('wishlist.html', apps=wishlist_apps)
+
 @app.route('/profile/<user_id>')
 def user_profile(user_id):
     if user_id not in users_db:
@@ -591,6 +632,93 @@ def update_profile():
             json.dump(users_db, f, indent=2)
         log_activity(user_id, 'profile_update', 'Updated profile information')
         return jsonify({'success': True})
+    return jsonify({'success': False, 'error': 'User not found'}), 404
+
+@app.route('/api/profile/upload-avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    """Handle avatar upload for user profile"""
+    if 'avatar' not in request.files:
+        return jsonify({'success': False, 'error': 'No file provided'}), 400
+    
+    file = request.files['avatar']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
+    
+    if file and allowed_file(file.filename):
+        # Generate unique filename
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{current_user.id}_{uuid.uuid4().hex[:8]}.{file_ext}"
+        filename = secure_filename(filename)
+        
+        # Ensure avatar directory exists
+        avatar_dir = os.path.join(project_path, app.config['AVATAR_FOLDER'])
+        os.makedirs(avatar_dir, exist_ok=True)
+        
+        # Save the file
+        filepath = os.path.join(avatar_dir, filename)
+        file.save(filepath)
+        
+        # Delete old avatar if exists
+        old_avatar = users_db.get(current_user.id, {}).get('avatar')
+        if old_avatar:
+            old_path = os.path.join(project_path, old_avatar)
+            if os.path.exists(old_path) and 'default' not in old_avatar:
+                try:
+                    os.remove(old_path)
+                except:
+                    pass  # Ignore errors when deleting old avatar
+        
+        # Update user data
+        avatar_url = f"/{app.config['AVATAR_FOLDER']}/{filename}"
+        users_db[current_user.id]['avatar'] = avatar_url
+        
+        # Save to database
+        users_file = os.path.join(project_path, 'users.json')
+        with open(users_file, 'w') as f:
+            json.dump(users_db, f, indent=2)
+        
+        # Log activity
+        log_activity(current_user.id, 'avatar_upload', 'Updated profile picture')
+        
+        return jsonify({
+            'success': True,
+            'avatar_url': avatar_url,
+            'message': 'Avatar uploaded successfully!'
+        })
+    
+    return jsonify({'success': False, 'error': 'Invalid file type. Please upload an image.'}), 400
+
+@app.route('/api/profile/remove-avatar', methods=['POST'])
+@login_required
+def remove_avatar():
+    """Remove user avatar and revert to default"""
+    user_id = current_user.id
+    
+    if user_id in users_db:
+        # Delete current avatar file if exists
+        current_avatar = users_db[user_id].get('avatar')
+        if current_avatar and 'default' not in current_avatar:
+            avatar_path = os.path.join(project_path, current_avatar.lstrip('/'))
+            if os.path.exists(avatar_path):
+                try:
+                    os.remove(avatar_path)
+                except:
+                    pass
+        
+        # Remove avatar from user data
+        users_db[user_id]['avatar'] = None
+        
+        # Save to database
+        users_file = os.path.join(project_path, 'users.json')
+        with open(users_file, 'w') as f:
+            json.dump(users_db, f, indent=2)
+        
+        # Log activity
+        log_activity(user_id, 'avatar_remove', 'Removed profile picture')
+        
+        return jsonify({'success': True, 'message': 'Avatar removed successfully!'})
+    
     return jsonify({'success': False, 'error': 'User not found'}), 404
 
 @app.route('/api/wishlist/add/<app_id>', methods=['POST'])
@@ -689,12 +817,132 @@ def admin_dashboard():
         for activity in activities[-10:]:
             all_activities.append({**activity, 'username': users_db.get(user_id, {}).get('username', 'Unknown')})
     all_activities.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-    return render_template('admin.html',
+    return render_template('admin_dashboard.html',
                          apps=apps,
                          total_users=total_users,
                          total_downloads=total_downloads,
                          total_reviews=total_reviews,
                          recent_activities=all_activities[:50])
+
+@app.route('/admin/apps')
+@admin_required
+def admin_apps():
+    """Admin page for managing apps"""
+    apps = load_apps()
+    return render_template('admin_apps.html', apps=apps)
+
+@app.route('/admin/app/add', methods=['GET', 'POST'])
+@admin_required
+def admin_add_app():
+    """Add new app"""
+    if request.method == 'POST':
+        data = request.form
+        new_app = {
+            'id': str(uuid.uuid4()),
+            'name': data.get('name'),
+            'developer': data.get('developer'),
+            'category': data.get('category'),
+            'description': data.get('description'),
+            'version': data.get('version'),
+            'size': data.get('size'),
+            'icon': data.get('icon', '/static/images/default_icon.png'),
+            'rating': 0,
+            'downloads': 0,
+            'price': float(data.get('price', 0)),
+            'reviews': [],
+            'screenshots': data.get('screenshots', '').split(',') if data.get('screenshots') else [],
+            'app_file': data.get('app_file'),
+            'download_link': data.get('download_link'),
+            'is_external_download': bool(data.get('is_external_download')),
+            'featured': bool(data.get('featured')),
+            'added_date': datetime.now().isoformat(),
+            'updated_date': datetime.now().isoformat()
+        }
+        
+        apps = load_apps()
+        apps.append(new_app)
+        save_apps(apps)
+        
+        flash('App added successfully!', 'success')
+        return redirect(url_for('admin_apps'))
+    
+    categories = get_categories()
+    return render_template('admin_add_app.html', categories=categories)
+
+@app.route('/admin/app/edit/<app_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_edit_app(app_id):
+    """Edit existing app"""
+    apps = load_apps()
+    app_data = next((app for app in apps if app['id'] == app_id), None)
+    
+    if not app_data:
+        abort(404)
+    
+    if request.method == 'POST':
+        data = request.form
+        app_data['name'] = data.get('name')
+        app_data['developer'] = data.get('developer')
+        app_data['category'] = data.get('category')
+        app_data['description'] = data.get('description')
+        app_data['version'] = data.get('version')
+        app_data['size'] = data.get('size')
+        app_data['icon'] = data.get('icon', app_data.get('icon'))
+        app_data['price'] = float(data.get('price', 0))
+        app_data['screenshots'] = data.get('screenshots', '').split(',') if data.get('screenshots') else app_data.get('screenshots', [])
+        app_data['app_file'] = data.get('app_file', app_data.get('app_file'))
+        app_data['download_link'] = data.get('download_link', app_data.get('download_link'))
+        app_data['is_external_download'] = bool(data.get('is_external_download'))
+        app_data['featured'] = bool(data.get('featured'))
+        app_data['updated_date'] = datetime.now().isoformat()
+        
+        save_apps(apps)
+        flash('App updated successfully!', 'success')
+        return redirect(url_for('admin_apps'))
+    
+    categories = get_categories()
+    return render_template('admin_edit_app.html', app=app_data, categories=categories)
+
+@app.route('/admin/app/delete/<app_id>', methods=['POST'])
+@admin_required
+def admin_delete_app(app_id):
+    """Delete an app"""
+    apps = load_apps()
+    apps = [app for app in apps if app['id'] != app_id]
+    save_apps(apps)
+    
+    return jsonify({'success': True, 'message': 'App deleted successfully!'})
+
+@app.route('/admin/users')
+@admin_required
+def admin_users():
+    """Admin page for managing users"""
+    users_list = []
+    for user_id, user_data in users_db.items():
+        users_list.append({
+            'id': user_id,
+            'username': user_data.get('username'),
+            'email': user_data.get('email'),
+            'created_at': user_data.get('created_at'),
+            'is_admin': user_data.get('is_admin', False),
+            'downloads_count': len(user_data.get('downloads_history', [])),
+            'favorites_count': len(user_data.get('favorites', [])),
+            'avatar': user_data.get('avatar')
+        })
+    
+    return render_template('admin_users.html', users=users_list)
+
+@app.route('/admin/user/toggle-admin/<user_id>', methods=['POST'])
+@admin_required
+def admin_toggle_admin(user_id):
+    """Toggle admin status for a user"""
+    if user_id in users_db:
+        users_db[user_id]['is_admin'] = not users_db[user_id].get('is_admin', False)
+        users_file = os.path.join(project_path, 'users.json')
+        with open(users_file, 'w') as f:
+            json.dump(users_db, f, indent=2)
+        return jsonify({'success': True, 'is_admin': users_db[user_id]['is_admin']})
+    return jsonify({'success': False, 'error': 'User not found'}), 404
 
 @app.route('/api/theme/toggle', methods=['POST'])
 def toggle_theme():
@@ -871,26 +1119,51 @@ def mark_notifications_read():
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
 
-@app.route('/api/review/<app_id>/helpful', methods=['POST'])
+@app.route('/api/review/helpful/<review_id>', methods=['POST'])
 @login_required
-def mark_review_helpful(app_id):
-    data = request.json
-    review_id = data.get('review_id')
+def vote_review_helpful(review_id):
+    """Vote a review as helpful"""
     apps = load_apps()
-    app_data = next((app for app in apps if app['id'] == app_id), None)
-    if app_data:
-        for review in app_data.get('reviews', []):
+    
+    # Find the review across all apps
+    review_found = False
+    for app in apps:
+        for review in app.get('reviews', []):
             if review.get('id') == review_id:
+                review_found = True
+                
+                # Initialize helpful votes structure if not exists
                 if 'helpful_votes' not in review:
-                    review['helpful_votes'] = []
-                if current_user.id not in review['helpful_votes']:
-                    review['helpful_votes'].append(current_user.id)
-                    review['helpful_count'] = len(review['helpful_votes'])
-                    save_apps(apps)
-                    return jsonify({'success': True, 'count': review['helpful_count']})
-                else:
-                    return jsonify({'success': False, 'message': 'Already voted'})
-    return jsonify({'success': False, 'error': 'Review not found'}), 404
+                    review['helpful_votes'] = 0
+                if 'voted_users' not in review:
+                    review['voted_users'] = []
+                
+                # Check if user already voted
+                if current_user.id in review['voted_users']:
+                    return jsonify({
+                        'success': False, 
+                        'message': 'You have already voted this review as helpful',
+                        'helpful_votes': review['helpful_votes']
+                    })
+                
+                # Add vote
+                review['helpful_votes'] += 1
+                review['voted_users'].append(current_user.id)
+                
+                # Save changes
+                save_apps(apps)
+                
+                # Log activity
+                log_activity(current_user.id, 'review_helpful', f'Voted review as helpful')
+                
+                return jsonify({
+                    'success': True, 
+                    'helpful_votes': review['helpful_votes'],
+                    'message': 'Review voted as helpful!'
+                })
+    
+    if not review_found:
+        return jsonify({'success': False, 'error': 'Review not found'}), 404
 
 @app.route('/api/settings/update', methods=['POST'])
 @login_required
@@ -905,6 +1178,13 @@ def update_settings():
             json.dump(users_db, f, indent=2)
         return jsonify({'success': True})
     return jsonify({'success': False}), 404
+
+# Serve apps_data.json for frontend access
+@app.route('/apps_data.json')
+def serve_apps_data():
+    """Serve the apps data JSON file"""
+    apps = load_apps()
+    return jsonify(apps)
 
 # --- 6. تشغيل التطبيق ---
 if __name__ == '__main__':

@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app-sections-enhanced.css') }}">
     <!-- Emergency Visibility Fix - Must be LAST -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app-visibility-fix.css') }}">
+    <!-- Welcome Notification and Onboarding Tour -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/welcome-onboarding.css') }}">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -98,6 +100,9 @@
                         <div class="dropdown-menu">
                             <a href="{{ url_for('favorites') }}">
                                 <i class="fas fa-heart"></i> My Favorites
+                            </a>
+                            <a href="{{ url_for('wishlist') }}">
+                                <i class="fas fa-bookmark"></i> My Wishlist
                             </a>
                             <a href="#">
                                 <i class="fas fa-download"></i> My Downloads
@@ -256,9 +261,14 @@
     <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main-enhanced.js') }}"></script>
     <script src="{{ url_for('static', filename='js/search-enhanced.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/wishlist.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/helpful-reviews.js') }}"></script>
     
     <!-- Firebase Authentication Header Sync -->
     <script type="module" src="{{ url_for('static', filename='js/auth-header-sync.js') }}"></script>
+    
+    <!-- Welcome Notification and Onboarding Tour -->
+    <script src="{{ url_for('static', filename='js/welcome-onboarding.js') }}"></script>
     
     <!-- Command Palette Info -->
     <script>

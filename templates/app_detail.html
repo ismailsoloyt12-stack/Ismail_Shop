@@ -4,6 +4,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/download-enhanced.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/helpful-reviews.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -70,8 +71,12 @@
                     {% endif %}
                 </button>
                 {% if current_user.is_authenticated %}
-                    <button class="btn-icon favorite-btn" onclick="toggleFavorite('{{ app.id }}')">
+                    <button class="btn-icon favorite-btn" onclick="toggleFavorite('{{ app.id }}')" title="Toggle Favorite">
                         <i class="far fa-heart"></i>
+                    </button>
+                    <button class="btn-icon wishlist-btn" data-app-id="{{ app.id }}" title="Add to Wishlist">
+                        <i class="far fa-bookmark wishlist-icon"></i>
+                        <span class="wishlist-text" style="display:none">Add to Wishlist</span>
                     </button>
                 {% endif %}
                 <button class="btn-icon share-btn">
@@ -1989,6 +1994,15 @@ function createReviewHTML(review) {
     const comment = review.review_comment || review.comment || '';
     const recommend = review.recommend !== undefined ? review.recommend : true;
     
+    const helpfulSection = review.id ? `
+            <div class=\"review-actions\"> 
+                <button class=\"helpful-btn\" data-review-id=\"${review.id}\" title=\"Mark as helpful\"> 
+                    <i class=\"fas fa-thumbs-up helpful-icon\"></i> 
+                    <span class=\"helpful-text\">Helpful</span> 
+                    <span class=\"helpful-count\">${review.helpful_votes || 0}</span> 
+                </button>
+            </div>` : '';
+
     return `
         <div class="review-item">
             <div class="review-header">
@@ -2012,6 +2026,7 @@ function createReviewHTML(review) {
                     <i class="fas fa-thumbs-up"></i> Recommends this app
                 </span>
             ` : ''}
+            ${helpfulSection}
         </div>
     `;
 }
