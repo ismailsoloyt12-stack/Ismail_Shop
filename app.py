@@ -259,8 +259,38 @@ def download_app(app_id):
     app_data = next((app for app in apps if app['id'] == app_id), None)
     if not app_data:
         return jsonify({'error': 'App not found'}), 404
+    
+    # Increment download count
     app_data['downloads'] = app_data.get('downloads', 0) + 1
     save_apps(apps)
+    
+    # Track download in user's history if logged in
+    if current_user.is_authenticated:
+        user_id = current_user.id
+        if user_id in users_db:
+            if 'downloads_history' not in users_db[user_id]:
+                users_db[user_id]['downloads_history'] = []
+            
+            # Check if already downloaded
+            already_downloaded = any(
+                d['app_id'] == app_id 
+                for d in users_db[user_id]['downloads_history']
+            )
+            
+            if not already_downloaded:
+                download_record = {
+                    'app_id': app_id,
+                    'date': datetime.now().isoformat(),
+                    'app_name': app_data.get('name', 'Unknown')
+                }
+                users_db[user_id]['downloads_history'].append(download_record)
+                
+                with open('users.json', 'w') as f:
+                    json.dump(users_db, f, indent=2)
+                
+                # Log activity
+                log_activity(user_id, 'download', f"Downloaded {app_data.get('name', 'app')}")
+    
     has_file = bool(app_data.get('app_file'))
     return jsonify({
         'success': True,
@@ -462,19 +492,50 @@ def user_profile(user_id):
         abort(404)
     user_data = users_db[user_id]
     apps = load_apps()
+    
+    # Fetch user downloads with complete app data
     user_downloads = []
     for download in user_data.get('downloads_history', []):
         app = next((a for a in apps if a['id'] == download['app_id']), None)
         if app:
             user_downloads.append({**app, 'download_date': download['date']})
+    
+    # Fetch user favorites with complete app data
+    user_favorites = []
+    for app_id in user_data.get('favorites', []):
+        app = next((a for a in apps if a['id'] == app_id), None)
+        if app:
+            user_favorites.append(app)
+    
+    # Fetch user reviews
     user_reviews = []
     for app in apps:
         for review in app.get('reviews', []):
             if review.get('user_id') == user_id:
                 user_reviews.append({**review, 'app_name': app['name'], 'app_icon': app.get('icon'), 'app_id': app['id']})
+    
+    # Fetch user collections
     user_collections = [c for c in collections_db.values() if c['user_id'] == user_id]
+    for collection in user_collections:
+        collection['apps_count'] = len(collection.get('apps', []))
+        collection['preview_apps'] = [app for app in apps if app['id'] in collection.get('apps', [])]
+    
+    # Fetch user wishlist
     user_wishlist = [app for app in apps if app['id'] in user_data.get('wishlist', [])]
+    
+    # Fetch user activities
     user_activities = activities_db.get(user_id, [])
+    
+    # Get user settings
+    user_settings = user_data.get('settings', {
+        'profile_public': True,
+        'show_downloads': True,
+        'show_collections': True,
+        'notify_updates': True,
+        'notify_reviews': True,
+        'notify_followers': True
+    })
+    
     profile_user = {
         'id': user_id,
         'username': user_data['username'],
@@ -490,13 +551,16 @@ def user_profile(user_id):
         'followers_count': len(user_data.get('followers', [])),
         'following_count': len(user_data.get('following', []))
     }
+    
     return render_template('profile.html',
                          user=profile_user,
                          user_downloads=user_downloads,
+                         user_favorites=user_favorites,
                          user_reviews=user_reviews,
                          user_collections=user_collections,
                          user_wishlist=user_wishlist,
-                         user_activities=user_activities)
+                         user_activities=user_activities,
+                         user_settings=user_settings)
 
 @app.route('/api/profile/update', methods=['POST'])
 @login_required
