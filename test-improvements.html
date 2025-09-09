@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Improvements Test - Ismail Store</title>
+    
+    <!-- Include all the enhanced styles -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/style-enhanced.css">
+    <link rel="stylesheet" href="static/css/search-enhanced.css">
+    <link rel="stylesheet" href="static/css/nav-enhanced.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Test-specific styles */
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 200px;
+        }
+        
+        .test-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .responsive-test {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .responsive-test {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+    </style>
+    
+    <script>
+        // Theme detection script
+        (function() {
+            const theme = localStorage.getItem('app-store-theme') || 
+                          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+        
+        // Test info display
+        function updateTestInfo() {
+            const testInfo = document.getElementById('test-info');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            let deviceType = 'Desktop';
+            
+            if (width <= 480) deviceType = 'Small Mobile';
+            else if (width <= 768) deviceType = 'Mobile';
+            else if (width <= 1024) deviceType = 'Tablet';
+            else if (width >= 1920) deviceType = 'Large Desktop';
+            
+            testInfo.innerHTML = `
+                <div><strong>Device:</strong> ${deviceType}</div>
+                <div><strong>Width:</strong> ${width}px</div>
+                <div><strong>Height:</strong> ${height}px</div>
+                <div><strong>Ratio:</strong> ${(width/height).toFixed(2)}</div>
+            `;
+        }
+        
+        window.addEventListener('load', updateTestInfo);
+        window.addEventListener('resize', updateTestInfo);
+    </script>
+</head>
+<body>
+    <div id="test-info" class="test-info"></div>
+    
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <a href="#" class="logo">
+                    <i class="fas fa-play-circle"></i>
+                    <span>ismail store</span>
+                </a>
+            </div>
+            
+            <div class="nav-center">
+                <form class="search-form">
+                    <div class="search-box" id="searchBox">
+                        <i class="fas fa-search"></i>
+                        <input type="text" 
+                               id="searchInput"
+                               placeholder="Search apps & games" 
+                               autocomplete="off">
+                        <button type="submit" class="search-btn">Search</button>
+                        <!-- Search Results Dropdown -->
+                        <div class="search-dropdown" id="searchDropdown">
+                            <div class="search-results-container" id="searchResults">
+                                <!-- Mock search results for testing -->
+                                <div class="search-section">
+                                    <div class="search-section-title">Apps</div>
+                                    <div class="search-item">
+                                        <div class="search-item-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                                            <i class="fas fa-camera"></i>
+                                        </div>
+                                        <div class="search-item-content">
+                                            <div class="search-item-title">PhotoShop Express</div>
+                                            <div class="search-item-subtitle">Photography • Free</div>
+                                        </div>
+                                    </div>
+                                    <div class="search-item">
+                                        <div class="search-item-icon" style="background: linear-gradient(135deg, #06ffa5 0%, #00d084 100%); display: flex; align-items: center; justify-content: center; color: white;">
+                                            <i class="fas fa-gamepad"></i>
+                                        </div>
+                                        <div class="search-item-content">
+                                            <div class="search-item-title">Minecraft</div>
+                                            <div class="search-item-subtitle">Games • $6.99</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="search-section">
+                                    <div class="search-section-title">Categories</div>
+                                    <div class="search-item">
+                                        <div class="search-item-icon" style="background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-th-large"></i>
+                                        </div>
+                                        <div class="search-item-content">
+                                            <div class="search-item-title">Browse Games</div>
+                                            <div class="search-item-subtitle">Category</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+                <a href="#" class="login-btn">
+                    <i class="fas fa-user"></i>
+                    <span>Sign In</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Test Hero Section -->
+        <div class="test-section">
+            <div class="test-title">✨ Enhanced Hero Section Test</div>
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1>Welcome to ismail store</h1>
+                    <p>Discover amazing apps and games for your device. From productivity tools to entertainment, find everything you need in one place.</p>
+                    <div class="hero-features">
+                        <div class="hero-feature">
+                            <i class="fas fa-download"></i>
+                            <span>Free Downloads</span>
+                        </div>
+                        <div class="hero-feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Safe & Secure</span>
+                        </div>
+                        <div class="hero-feature">
+                            <i class="fas fa-star"></i>
+                            <span>Top Rated Apps</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <p><strong>Features to test:</strong> Animated gradient background, floating elements, professional shadows, responsive design, hover effects on badges.</p>
+        </div>
+        
+        <!-- Test Search Bar -->
+        <div class="test-section">
+            <div class="test-title">🔍 Enhanced Search Bar Test</div>
+            <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 1rem;">
+                <form class="search-form" style="max-width: 600px; margin: 0 auto;">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Try typing here to see the enhanced effects..." onclick="showSearchDropdown()">
+                        <button type="submit" class="search-btn">Search</button>
+                        <div class="search-dropdown active" id="testDropdown" style="display: none;">
+                            <div class="search-results-container">
+                                <div class="search-section">
+                                    <div class="search-section-title">Popular Apps</div>
+                                    <div class="search-item">
+                                        <div class="search-item-icon" style="background: #ff6b6b; color: white; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </div>
+                                        <div class="search-item-content">
+                                            <div class="search-item-title">WhatsApp</div>
+                                            <div class="search-item-subtitle">Social • Free</div>
+                                        </div>
+                                    </div>
+                                    <div class="search-item">
+                                        <div class="search-item-icon" style="background: #4285f4; color: white; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fab fa-chrome"></i>
+                                        </div>
+                                        <div class="search-item-content">
+                                            <div class="search-item-title">Chrome Browser</div>
+                                            <div class="search-item-subtitle">Productivity • Free</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <p><strong>Features to test:</strong> Enhanced focus effects, gradient button, backdrop blur, professional shadows, smooth animations, mobile responsiveness.</p>
+        </div>
+        
+        <!-- Responsive Test Grid -->
+        <div class="test-section">
+            <div class="test-title">📱 Responsive Design Test</div>
+            <div class="responsive-test">
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 0.75rem;">
+                    <h3>Desktop (>1024px)</h3>
+                    <p>Full search button visible, larger hero padding, multi-column layout</p>
+                </div>
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 0.75rem;">
+                    <h3>Tablet (768-1024px)</h3>
+                    <p>Adjusted search bar width, optimized hero section</p>
+                </div>
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 0.75rem;">
+                    <h3>Mobile (≤768px)</h3>
+                    <p>Hidden search button, compact hero features, mobile-optimized dropdown</p>
+                </div>
+                <div style="background: var(--bg-secondary); padding: 1.5rem; border-radius: 0.75rem;">
+                    <h3>Small Mobile (≤480px)</h3>
+                    <p>Ultra-compact layout, minimal padding, touch-optimized interactions</p>
+                </div>
+            </div>
+            <p><strong>Resize the browser window</strong> to test different breakpoints. Watch the device info in the top-right corner.</p>
+        </div>
+        
+        <!-- Theme Test -->
+        <div class="test-section">
+            <div class="test-title">🌙 Dark/Light Theme Test</div>
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <button onclick="setTheme('light')" style="padding: 0.5rem 1rem; border: none; background: var(--accent-primary); color: white; border-radius: 0.5rem; cursor: pointer;">
+                    <i class="fas fa-sun"></i> Light Theme
+                </button>
+                <button onclick="setTheme('dark')" style="padding: 0.5rem 1rem; border: none; background: var(--text-primary); color: var(--bg-primary); border-radius: 0.5rem; cursor: pointer;">
+                    <i class="fas fa-moon"></i> Dark Theme
+                </button>
+                <button onclick="setTheme('auto')" style="padding: 0.5rem 1rem; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); border-radius: 0.5rem; cursor: pointer;">
+                    <i class="fas fa-magic"></i> Auto
+                </button>
+            </div>
+            <p><strong>Test both themes</strong> to ensure all colors, gradients, and effects work correctly in light and dark modes.</p>
+        </div>
+    </main>
+    
+    <script>
+        // Theme management
+        function setTheme(theme) {
+            if (theme === 'auto') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('app-store-theme', theme);
+            
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+        
+        // Search dropdown demo
+        function showSearchDropdown() {
+            const dropdown = document.getElementById('testDropdown');
+            dropdown.style.display = 'block';
+            setTimeout(() => {
+                dropdown.classList.add('active');
+            }, 10);
+        }
+        
+        // Hide search dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-box')) {
+                const dropdown = document.getElementById('testDropdown');
+                dropdown.classList.remove('active');
+                setTimeout(() => {
+                    dropdown.style.display = 'none';
+                }, 250);
+            }
+        });
+        
+        // Initialize theme on load
+        window.addEventListener('load', function() {
+            const theme = localStorage.getItem('app-store-theme') || 
+                          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            setTheme(theme);
+        });
+        
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hero features hover effect
+            const heroFeatures = document.querySelectorAll('.hero-feature');
+            heroFeatures.forEach(feature => {
+                feature.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px) scale(1.05)';
+                });
+                feature.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-2px) scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

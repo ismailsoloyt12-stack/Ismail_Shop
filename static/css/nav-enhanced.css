@@ -1,0 +1,338 @@
+/* Enhanced Navigation CSS - Mobile First Responsive Design */
+
+/* User Profile Button - Icon Only */
+.user-btn-icon-only {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+}
+
+.user-btn-icon-only:hover {
+    background: rgba(67, 97, 238, 0.1);
+}
+
+.user-btn-icon-only i {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+/* Mobile Navigation Enhancements */
+@media screen and (max-width: 768px) {
+    /* Navigation Container */
+    .nav-container {
+        padding: 0 8px;
+        gap: 8px;
+    }
+    
+    /* Hide logo text on very small screens */
+    @media screen and (max-width: 380px) {
+        .logo span {
+            display: none;
+        }
+    }
+    
+    /* Search Box - Full Width on Mobile */
+    .nav-center {
+        flex: 1;
+        max-width: none;
+        margin: 0 4px;
+    }
+    
+    .search-box {
+        width: 100%;
+        border-radius: 20px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+    }
+    
+    .search-box input {
+        padding: 8px 12px 8px 36px;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .search-box i {
+        left: 12px;
+        font-size: 14px;
+    }
+    
+    /* Hide search button on mobile */
+    .search-btn {
+        display: none;
+    }
+    
+    /* Navigation Right Section */
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+    }
+    
+    /* Theme Toggle - Compact on Mobile */
+    .theme-toggle {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        transition: all 0.3s ease;
+    }
+    
+    .theme-toggle:hover {
+        background: rgba(67, 97, 238, 0.1);
+    }
+    
+    .theme-toggle i {
+        font-size: 18px;
+    }
+    
+    /* User Menu - Mobile Optimized */
+    .user-menu {
+        position: relative;
+    }
+    
+    .user-btn-icon-only {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .user-btn-icon-only i {
+        font-size: 20px;
+    }
+    
+    /* Dropdown Menu - Full Width on Mobile */
+    .dropdown-menu {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        top: calc(var(--navbar-height-mobile) + 8px);
+        width: auto;
+        max-width: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        z-index: 1001;
+    }
+    
+    .dropdown-menu a {
+        padding: 12px 16px;
+        font-size: 15px;
+    }
+    
+    /* Menu Toggle Button */
+    .menu-toggle {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .menu-toggle:hover {
+        background: rgba(67, 97, 238, 0.1);
+    }
+    
+    .menu-toggle i {
+        font-size: 20px;
+        color: var(--text-primary);
+    }
+}
+
+/* Small Phone Adjustments */
+@media screen and (max-width: 360px) {
+    .nav-container {
+        padding: 0 6px;
+        gap: 4px;
+    }
+    
+    .search-box input {
+        padding: 6px 10px 6px 32px;
+        font-size: 13px;
+    }
+    
+    .user-btn-icon-only,
+    .theme-toggle {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .user-btn-icon-only i {
+        font-size: 18px;
+    }
+    
+    .theme-toggle i {
+        font-size: 16px;
+    }
+    
+    .menu-toggle i {
+        font-size: 18px;
+    }
+}
+
+/* Tablet Adjustments */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .nav-center {
+        max-width: 400px;
+    }
+    
+    .user-btn-icon-only {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .user-btn-icon-only i {
+        font-size: 22px;
+    }
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .user-btn-icon-only:hover {
+    background: rgba(129, 140, 248, 0.1);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(129, 140, 248, 0.1);
+}
+
+[data-theme="dark"] .menu-toggle:hover {
+    background: rgba(129, 140, 248, 0.1);
+}
+
+[data-theme="dark"] .search-box {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Login Button Mobile Styles */
+@media screen and (max-width: 768px) {
+    .login-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .login-btn span {
+        display: none;
+    }
+    
+    .login-btn i {
+        font-size: 18px;
+    }
+}
+
+/* Enhanced Search Dropdown for Mobile */
+@media screen and (max-width: 768px) {
+    .search-dropdown {
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        top: calc(var(--navbar-height-mobile) + 8px);
+        max-height: 70vh;
+        overflow-y: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* Ensure proper z-index hierarchy */
+.navbar {
+    z-index: 1000;
+}
+
+.dropdown-menu,
+.search-dropdown {
+    z-index: 1001;
+}
+
+.sidebar {
+    z-index: 999;
+}
+
+/* Smooth transitions */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, a {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Improve touch targets for mobile */
+@media screen and (max-width: 768px) {
+    button, a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .dropdown-menu a {
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Profile Picture Styles */
+.user-profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-primary);
+}
+
+@media screen and (max-width: 768px) {
+    .user-profile-img {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+/* Firebase Auth Profile Adjustments */
+.header-user-profile {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+@media screen and (max-width: 768px) {
+    .header-user-profile div:first-child {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    .header-user-profile img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}

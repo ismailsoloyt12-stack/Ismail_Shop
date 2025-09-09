@@ -80,20 +80,6 @@ function createUserProfileElement(user) {
 
     profileContainer.appendChild(profileElement);
 
-    // Add username if available
-    const userName = document.createElement('span');
-    userName.style.cssText = `
-        color: #333;
-        font-size: 14px;
-        font-weight: 500;
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    `;
-    userName.textContent = user.displayName || user.email.split('@')[0];
-    profileContainer.appendChild(userName);
-
     // Create dropdown menu
     const dropdown = document.createElement('div');
     dropdown.className = 'header-dropdown-menu';

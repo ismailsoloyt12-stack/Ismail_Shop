@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
-    <title>{% block title %}Game & App Store{% endblock %}</title>
+    <title>{% block title %}ismail store{% endblock %}</title>
     
     <!-- Early Theme Application to Prevent Flash -->
     <script>
@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style-enhanced.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search-enhanced.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-enhanced.css') }}">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -52,7 +53,7 @@
                 </button>
                 <a href="{{ url_for('index') }}" class="logo">
                     <i class="fas fa-play-circle"></i>
-                    <span>App Store</span>
+                    <span>ismail store</span>
                 </a>
             </div>
             
@@ -85,9 +86,8 @@
                 
                 {% if current_user.is_authenticated %}
                     <div class="user-menu">
-                        <button class="user-btn">
+                        <button class="user-btn user-btn-icon-only">
                             <i class="fas fa-user-circle"></i>
-                            <span>{{ current_user.username }}</span>
                         </button>
                         <div class="dropdown-menu">
                             <a href="{{ url_for('favorites') }}">
