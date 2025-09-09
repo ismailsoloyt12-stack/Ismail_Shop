@@ -905,6 +905,8 @@
                             setTimeout(() => {
                                 entry.target.style.setProperty('--card-index', index);
                                 entry.target.classList.add('animate-in');
+                                // Ensure cards are visible after animation
+                                entry.target.style.opacity = '1';
                             }, index * 50);
                             cardObserver.unobserve(entry.target);
                         }
@@ -915,7 +917,8 @@
                 });
                 
                 appCards.forEach(card => {
-                    card.style.opacity = '0';
+                    // Don't hide cards initially - let CSS handle visibility
+                    // card.style.opacity = '0'; // REMOVED - This was causing the issue
                     cardObserver.observe(card);
                 });
             }

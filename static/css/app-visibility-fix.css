@@ -1,0 +1,110 @@
+/* Emergency App Card Visibility Fix 
+   This file ensures app cards are ALWAYS visible
+   Load this LAST in your CSS chain */
+
+/* Force visibility on all app cards and their contents */
+.app-card,
+.app-card *,
+.app-section .app-card,
+.app-section .app-card * {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure app cards have visible backgrounds */
+.app-card {
+    background-color: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    display: block !important;
+    position: relative !important;
+}
+
+[data-theme="dark"] .app-card {
+    background-color: #2d2d2d !important;
+    border: 1px solid #404040 !important;
+}
+
+/* Ensure all app card child elements are visible */
+.app-link {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.app-icon {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    background: #f0f0f0 !important;
+}
+
+[data-theme="dark"] .app-icon {
+    background: #3a3a3a !important;
+}
+
+.app-icon img {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.app-info,
+.app-name,
+.app-developer,
+.app-meta,
+.app-rating,
+.app-stats,
+.app-price {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Text visibility */
+.app-name {
+    color: #333333 !important;
+}
+
+[data-theme="dark"] .app-name {
+    color: #ffffff !important;
+}
+
+.app-developer {
+    color: #666666 !important;
+}
+
+[data-theme="dark"] .app-developer {
+    color: #cccccc !important;
+}
+
+/* Ensure badges are visible */
+.free-badge,
+.new-badge,
+.category-badge {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
+}
+
+.free-badge {
+    background-color: #1e8e3e !important;
+    color: #ffffff !important;
+}
+
+/* Override any animation states */
+.app-card.animate-in {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Remove any transforms that might hide content */
+.app-card {
+    transform: none !important;
+}
+
+/* Ensure grid is displayed properly */
+.apps-grid {
+    display: grid !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}

@@ -1,0 +1,451 @@
+/* ==========================================
+   ENHANCED APP SECTIONS WITH VISIBILITY FIX
+   Professional, Modern, Clean Design
+   Compatible with PythonAnywhere
+   ========================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ==========================================
+   ROOT VARIABLES - ENHANCED COLORS
+   ========================================== */
+:root {
+    /* Enhanced Color Palette */
+    --app-bg-light: #ffffff;
+    --app-bg-card: #ffffff;
+    --app-bg-hover: #f8f9fa;
+    --app-border: #e0e0e0;
+    --app-text-primary: #202124;
+    --app-text-secondary: #5f6368;
+    --app-text-tertiary: #80868b;
+    
+    /* Accent Colors */
+    --app-accent-blue: #1a73e8;
+    --app-accent-green: #1e8e3e;
+    --app-accent-red: #ea4335;
+    --app-accent-yellow: #fbbc04;
+    --app-accent-purple: #9333ea;
+    --app-accent-orange: #fb923c;
+    
+    /* Gradients */
+    --app-gradient-featured: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --app-gradient-trending: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --app-gradient-new: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    
+    /* Enhanced Shadows */
+    --app-shadow-sm: 0 2px 4px rgba(0,0,0,0.06);
+    --app-shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+    --app-shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+    --app-shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
+    --app-shadow-hover: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    --app-bg-light: #1a1a1a;
+    --app-bg-card: #2d2d2d;
+    --app-bg-hover: #3a3a3a;
+    --app-border: #404040;
+    --app-text-primary: #f0f0f0;
+    --app-text-secondary: #b0b0b0;
+    --app-text-tertiary: #808080;
+    
+    --app-shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+    --app-shadow-md: 0 4px 6px rgba(0,0,0,0.25);
+    --app-shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+    --app-shadow-xl: 0 20px 25px rgba(0,0,0,0.35);
+    --app-shadow-hover: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* ==========================================
+   FIX APP CARD VISIBILITY ISSUES
+   ========================================== */
+
+/* Override transparent background from playstore CSS */
+.app-section .app-card,
+.similar-apps .app-card {
+    background: var(--app-bg-card) !important;
+    border: 1px solid var(--app-border) !important;
+    border-radius: 16px !important;
+    padding: 12px !important;
+    box-shadow: var(--app-shadow-sm) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: visible !important;
+    /* Force visibility to override JavaScript */
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Ensure animate-in class doesn't hide cards */
+.app-section .app-card.animate-in,
+.similar-apps .app-card.animate-in {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure app icon has proper background */
+.app-section .app-icon,
+.similar-apps .app-icon {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    box-shadow: var(--app-shadow-md) !important;
+    border-radius: 16px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+[data-theme="dark"] .app-section .app-icon,
+[data-theme="dark"] .similar-apps .app-icon {
+    background: linear-gradient(135deg, #434343 0%, #262626 100%) !important;
+}
+
+/* Ensure text is visible */
+.app-section .app-name,
+.similar-apps .app-name {
+    color: var(--app-text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+.app-section .app-developer,
+.similar-apps .app-developer {
+    color: var(--app-text-secondary) !important;
+    font-size: 12px !important;
+    opacity: 1 !important;
+}
+
+/* Fix price badge visibility */
+.app-section .app-price .free-badge,
+.similar-apps .app-price .free-badge {
+    background: var(--app-accent-green) !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    display: inline-block !important;
+}
+
+/* ==========================================
+   ENHANCED FEATURED APPS SECTION
+   ========================================== */
+
+/* Featured Apps Special Styling */
+.app-section:first-of-type .app-card {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Add "Featured" ribbon */
+.app-section:first-of-type .app-card::after {
+    content: "FEATURED";
+    position: absolute;
+    top: 10px;
+    right: -30px;
+    background: var(--app-gradient-featured);
+    color: white;
+    padding: 2px 40px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* Featured Card Hover Effect */
+.app-section:first-of-type .app-card:hover {
+    transform: translateY(-5px) scale(1.02) !important;
+    box-shadow: var(--app-shadow-hover) !important;
+    border-color: #667eea !important;
+}
+
+/* Featured App Icon Animation */
+@keyframes featuredPulse {
+    0% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
+
+.app-section:first-of-type .app-card:hover .app-icon {
+    animation: featuredPulse 1.5s infinite;
+}
+
+/* Star Rating Enhancement for Featured */
+.app-section:first-of-type .app-rating .stars {
+    color: #ffd700 !important;
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+}
+
+/* ==========================================
+   ENHANCED TRENDING NOW SECTION
+   ========================================== */
+
+/* Trending Badge */
+.app-section:nth-of-type(2) .app-card {
+    position: relative;
+}
+
+/* Fire Animation for Trending */
+@keyframes fireFlicker {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.app-section:nth-of-type(2) .section-header h2 i {
+    color: #ff6b6b !important;
+    animation: fireFlicker 1.5s ease-in-out infinite;
+}
+
+/* Trending Indicator */
+.app-section:nth-of-type(2) .app-card::before {
+    content: "🔥 HOT";
+    position: absolute;
+    top: -5px;
+    left: 10px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.4);
+}
+
+/* Download Count Animation */
+@keyframes downloadCount {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.app-section:nth-of-type(2) .app-stats {
+    position: relative;
+    font-weight: 600 !important;
+    color: var(--app-accent-orange) !important;
+}
+
+.app-section:nth-of-type(2) .app-stats i {
+    animation: downloadCount 2s ease-in-out infinite;
+    color: var(--app-accent-orange) !important;
+}
+
+/* Trending Card Hover */
+.app-section:nth-of-type(2) .app-card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 12px 24px rgba(255, 107, 107, 0.2) !important;
+    border-color: #ff6b6b !important;
+}
+
+/* ==========================================
+   ENHANCED RECENTLY ADDED SECTION
+   ========================================== */
+
+/* New Badge Enhancement */
+.app-section:nth-of-type(3) .new-badge {
+    background: var(--app-gradient-new) !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+    animation: newBadgePulse 2s ease-in-out infinite;
+    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4) !important;
+}
+
+@keyframes newBadgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Add "Just Added" timestamp */
+.app-section:nth-of-type(3) .app-card {
+    position: relative;
+}
+
+.app-section:nth-of-type(3) .app-developer::after {
+    content: " • Just now";
+    color: var(--app-accent-blue);
+    font-weight: 500;
+    font-size: 11px;
+}
+
+/* Sparkle Effect for New Apps */
+@keyframes sparkle {
+    0% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    100% { opacity: 0; transform: scale(0) rotate(360deg); }
+}
+
+.app-section:nth-of-type(3) .app-icon::before {
+    content: "✨";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 20px;
+    animation: sparkle 3s ease-in-out infinite;
+    z-index: 10;
+}
+
+/* Recently Added Card Hover */
+.app-section:nth-of-type(3) .app-card:hover {
+    transform: translateY(-5px) rotate(-1deg) !important;
+    box-shadow: 0 10px 25px rgba(79, 172, 254, 0.2) !important;
+    border-color: #4facfe !important;
+}
+
+/* ==========================================
+   COMMON ENHANCEMENTS FOR ALL SECTIONS
+   ========================================== */
+
+/* Smooth Loading Animation */
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-card {
+    animation: cardFadeIn 0.5s ease-out forwards;
+}
+
+.app-card:nth-child(1) { animation-delay: 0.05s; }
+.app-card:nth-child(2) { animation-delay: 0.1s; }
+.app-card:nth-child(3) { animation-delay: 0.15s; }
+.app-card:nth-child(4) { animation-delay: 0.2s; }
+.app-card:nth-child(5) { animation-delay: 0.25s; }
+.app-card:nth-child(6) { animation-delay: 0.3s; }
+
+/* Interactive Install Button (Future Enhancement) */
+.app-card .quick-install {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: var(--app-accent-green);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30, 142, 62, 0.3);
+}
+
+.app-card:hover .quick-install {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.quick-install:hover {
+    background: #15803d;
+    transform: scale(1.1);
+}
+
+/* Category Pills */
+.category-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 3px 10px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2) !important;
+}
+
+/* App Icon Overlay for Loading */
+.app-icon::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.app-card:hover .app-icon::after {
+    transform: translateX(100%);
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 768px) {
+    .app-section .apps-grid,
+    .similar-apps .apps-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+        gap: 16px 12px !important;
+    }
+    
+    .app-section .app-card,
+    .similar-apps .app-card {
+        padding: 10px !important;
+    }
+    
+    .app-section:first-of-type .app-card::after,
+    .app-section:nth-of-type(2) .app-card::before {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .app-section .apps-grid,
+    .similar-apps .apps-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+        gap: 12px 8px !important;
+    }
+    
+    .app-section .app-card,
+    .similar-apps .app-card {
+        padding: 8px !important;
+    }
+    
+    .app-name {
+        font-size: 12px !important;
+    }
+    
+    .app-developer {
+        font-size: 10px !important;
+    }
+}
+
+/* Performance Optimizations */
+.app-card {
+    will-change: transform, box-shadow;
+}
+
+.app-icon img {
+    will-change: transform;
+}
+
+/* Accessibility Improvements */
+.app-card:focus-visible {
+    outline: 2px solid var(--app-accent-blue);
+    outline-offset: 2px;
+}
+
+.app-link:focus {
+    outline: none;
+}
+
+/* Print Styles */
+@media print {
+    .app-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+    }
+}

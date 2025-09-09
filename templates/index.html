@@ -3,6 +3,39 @@
 {% block title %}Home - ismail store{% endblock %}
 
 {% block content %}
+<!-- Emergency Fix for App Card Visibility -->
+<style>
+    /* Force app cards to be visible - override any JavaScript or CSS issues */
+    .app-card {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+        background: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+    }
+    
+    [data-theme="dark"] .app-card {
+        background: #2d2d2d !important;
+        border: 1px solid #404040 !important;
+    }
+    
+    .app-card * {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Ensure app content is visible */
+    .app-link, .app-icon, .app-info, .app-name, .app-developer {
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: block !important;
+    }
+    
+    .app-icon img {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+</style>
 <div class="home-container">
     <!-- Hero Banner -->
     <section class="hero-section">

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Visibility Test - ismail store</title>
+    
+    <!-- CSS Files (simulate the same loading order as base.html) -->
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/style-enhanced.css">
+    <link rel="stylesheet" href="static/css/app-display-playstore.css">
+    <link rel="stylesheet" href="static/css/app-sections-enhanced.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Test-specific styles */
+        body {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin-bottom: 60px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status-fixed {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status-enhanced {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .test-notes {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .test-notes h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .test-notes ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .test-notes li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .test-notes li:before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        /* Theme toggle for testing */
+        .theme-test-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .theme-test-controls button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .theme-test-controls button:hover {
+            background: #764ba2;
+        }
+        
+        [data-theme="dark"] {
+            background: #1a1a1a;
+        }
+        
+        [data-theme="dark"] .test-section {
+            background: #2d2d2d;
+        }
+        
+        [data-theme="dark"] .test-section h2,
+        [data-theme="dark"] .test-notes h3 {
+            color: #f0f0f0;
+        }
+        
+        [data-theme="dark"] .test-notes {
+            background: #3a3a3a;
+            color: #e0e0e0;
+        }
+        
+        [data-theme="dark"] .theme-test-controls {
+            background: #2d2d2d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Test Controls -->
+    <div class="theme-test-controls">
+        <h4>Theme Testing</h4>
+        <button onclick="setTheme('light')">Light Mode</button>
+        <button onclick="setTheme('dark')">Dark Mode</button>
+    </div>
+
+    <!-- Test Header -->
+    <div class="test-header">
+        <h1>App Visibility & Enhancement Test</h1>
+        <p>Testing the visibility fixes and new features for app sections</p>
+    </div>
+
+    <!-- Test Section 1: Featured Apps -->
+    <div class="test-section">
+        <h2>
+            <i class="fas fa-star"></i> 
+            Featured Apps Section
+            <span class="status-badge status-fixed">FIXED</span>
+            <span class="status-badge status-enhanced">ENHANCED</span>
+        </h2>
+        
+        <div class="app-section">
+            <div class="apps-grid">
+                <!-- Test App Card 1 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/667eea/ffffff?text=App1" alt="Test App 1">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">WhatsApp Messenger</h3>
+                            <p class="app-developer">Meta Platforms Inc</p>
+                            <div class="app-meta">
+                                <div class="app-rating">
+                                    <span class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </span>
+                                    <span class="rating-value">4.5</span>
+                                </div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Test App Card 2 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/764ba2/ffffff?text=App2" alt="Test App 2">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">Instagram</h3>
+                            <p class="app-developer">Instagram</p>
+                            <div class="app-meta">
+                                <div class="app-rating">
+                                    <span class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                    </span>
+                                    <span class="rating-value">4.0</span>
+                                </div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Test App Card 3 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/4facfe/ffffff?text=App3" alt="Test App 3">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">Spotify Music</h3>
+                            <p class="app-developer">Spotify Ltd.</p>
+                            <div class="app-meta">
+                                <div class="app-rating">
+                                    <span class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </span>
+                                    <span class="rating-value">5.0</span>
+                                </div>
+                                <div class="app-price">
+                                    <span class="price">$9.99</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-notes">
+            <h3>Fixes & Enhancements Applied:</h3>
+            <ul>
+                <li>App cards now have visible white/dark background (was transparent)</li>
+                <li>Text colors are properly set for visibility</li>
+                <li>Added "FEATURED" ribbon on hover</li>
+                <li>Enhanced star ratings with golden color and glow effect</li>
+                <li>Pulse animation on icon hover</li>
+                <li>Improved hover effects with elevation</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Test Section 2: Trending Now -->
+    <div class="test-section">
+        <h2>
+            <i class="fas fa-fire"></i> 
+            Trending Now Section
+            <span class="status-badge status-fixed">FIXED</span>
+            <span class="status-badge status-enhanced">ENHANCED</span>
+        </h2>
+        
+        <div class="app-section">
+            <div class="apps-grid">
+                <!-- Test Trending App 1 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/ff6b6b/ffffff?text=Hot1" alt="Trending App 1">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">TikTok</h3>
+                            <p class="app-developer">TikTok Pte. Ltd.</p>
+                            <div class="app-meta">
+                                <div class="app-stats">
+                                    <i class="fas fa-download"></i>
+                                    <span>10M+ downloads</span>
+                                </div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Test Trending App 2 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/feca57/ffffff?text=Hot2" alt="Trending App 2">
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">Among Us</h3>
+                            <p class="app-developer">InnerSloth LLC</p>
+                            <div class="app-meta">
+                                <div class="app-stats">
+                                    <i class="fas fa-download"></i>
+                                    <span>500M+ downloads</span>
+                                </div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-notes">
+            <h3>Fixes & Enhancements Applied:</h3>
+            <ul>
+                <li>Fixed visibility with proper backgrounds</li>
+                <li>Added "🔥 HOT" badge indicator</li>
+                <li>Fire icon animation in section header</li>
+                <li>Download count animation on hover</li>
+                <li>Orange-themed hover effects</li>
+                <li>Enhanced shadow with warm colors</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Test Section 3: Recently Added -->
+    <div class="test-section">
+        <h2>
+            <i class="fas fa-clock"></i> 
+            Recently Added Section
+            <span class="status-badge status-fixed">FIXED</span>
+            <span class="status-badge status-enhanced">ENHANCED</span>
+        </h2>
+        
+        <div class="app-section">
+            <div class="apps-grid">
+                <!-- Test Recent App 1 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/4facfe/ffffff?text=New1" alt="Recent App 1">
+                            <span class="new-badge">NEW</span>
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">Threads</h3>
+                            <p class="app-developer">Instagram</p>
+                            <div class="app-meta">
+                                <div class="category-badge">Social</div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Test Recent App 2 -->
+                <div class="app-card">
+                    <a href="#" class="app-link">
+                        <div class="app-icon">
+                            <img src="https://via.placeholder.com/150/00f2fe/ffffff?text=New2" alt="Recent App 2">
+                            <span class="new-badge">NEW</span>
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">ChatGPT</h3>
+                            <p class="app-developer">OpenAI</p>
+                            <div class="app-meta">
+                                <div class="category-badge">Productivity</div>
+                                <div class="app-price">
+                                    <span class="free-badge">FREE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-notes">
+            <h3>Fixes & Enhancements Applied:</h3>
+            <ul>
+                <li>Fixed card visibility issues</li>
+                <li>Enhanced NEW badge with gradient and pulse animation</li>
+                <li>Added "Just now" timestamp to developer info</li>
+                <li>Sparkle animation effect on app icons</li>
+                <li>Playful rotation on hover</li>
+                <li>Blue-themed shadow effects</li>
+                <li>Improved category badge styling</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="test-header" style="background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);">
+        <h2>✅ All Issues Fixed & Enhancements Applied</h2>
+        <p>The app sections are now fully visible with enhanced visual features that are PythonAnywhere-compatible</p>
+    </div>
+
+    <script>
+        // Theme switching for testing
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('test-theme', theme);
+        }
+        
+        // Load saved theme
+        const savedTheme = localStorage.getItem('test-theme') || 'light';
+        setTheme(savedTheme);
+        
+        // Log success
+        console.log('✅ App Visibility Test Page Loaded Successfully');
+        console.log('📋 Test Features:');
+        console.log('  - Fixed transparent background issue');
+        console.log('  - Enhanced Featured Apps with ribbons and animations');
+        console.log('  - Enhanced Trending Now with fire badges and indicators');
+        console.log('  - Enhanced Recently Added with sparkles and timestamps');
+        console.log('  - All features are CSS-only (PythonAnywhere compatible)');
+    </script>
+</body>
+</html>
